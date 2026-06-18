@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Live status for every Atlas Systems service, checked in your browser, right now.">
+<meta name="theme-color" content="#0a0a0f">
+<link rel="icon" type="image/png" href="https://raw.githubusercontent.com/AtlasReaper311/AtlasReaper311/main/atlas-icon-dark-32.png">
+<title>Atlas Systems // status</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #0a0a0f;
+    --bg-1:      #111118;
+    --bg-2:      #1a1a24;
+    --border:    rgba(255,255,255,0.08);
+    --border-hi: rgba(255,255,255,0.16);
+    --text:      #e8e8e0;
+    --text-dim:  #888880;
+    --text-faint:#3a3a44;
+    --accent:    #f5a623;
+    --green:     #4ade80;
+    --red:       #e24b4a;
+    --mono:      'IBM Plex Mono', monospace;
+    --serif:     'DM Serif Display', Georgia, serif;
+    --nav-h:     56px;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 14px;
+    line-height: 1.6;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── NAV (identical to atlas-systems.uk) ─────── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: var(--nav-h);
+    background: rgba(10,10,15,0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 clamp(1.5rem, 5vw, 3rem);
+    z-index: 100;
+  }
+
+  .nav-wordmark {
+    font-family: var(--mono);
+    font-weight: 500;
+    font-size: 13px;
+    letter-spacing: 0.12em;
+    color: var(--text);
+    text-decoration: none;
+    text-transform: uppercase;
+  }
+  .nav-wordmark span { color: var(--accent); }
+
+  .nav-links { display: flex; gap: 0; list-style: none; }
+  .nav-links a {
+    display: block;
+    padding: 0.35rem 1rem;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    text-decoration: none;
+    transition: color 0.15s;
+    position: relative;
+  }
+  .nav-links a::after {
+    content: '';
+    position: absolute;
+    bottom: -1px; left: 50%; right: 50%;
+    height: 1px;
+    background: var(--accent);
+    transition: left 0.2s, right 0.2s;
+  }
+  .nav-links a:hover { color: var(--text); }
+  .nav-links a:hover::after { left: 1rem; right: 1rem; }
+
+  /* ── MAIN LAYOUT ──────────────────────────────── */
+  main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 clamp(1.5rem, 5vw, 3rem);
+  }
+
+  /* ── HERO (same rhythm as the homepage hero) ──── */
+  .hero {
+    padding-top: calc(var(--nav-h) + 6rem);
+    padding-bottom: 5rem;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+  }
+  .hero::after {
+    content: '';
+    position: absolute;
+    top: 0; right: 0;
+    width: 1px;
+    height: 40%;
+    background: linear-gradient(to bottom, transparent, var(--border), transparent);
+    pointer-events: none;
+  }
+
+  .terminal-line {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-bottom: 2.5rem;
+  }
+  .terminal-prompt { color: var(--accent); }
+  .cursor {
+    display: inline-block;
+    width: 8px; height: 13px;
+    background: var(--accent);
+    vertical-align: middle;
+    animation: blink 1.1s step-end infinite;
+    margin-left: 1px;
+  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+  @media (prefers-reduced-motion: reduce) { .cursor { animation: none; } }
+
+  .hero-heading {
+    font-family: var(--serif);
+    font-size: clamp(2.8rem, 6vw, 5rem);
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+    color: var(--text);
+    margin-bottom: 1.5rem;
+  }
+  .hero-heading em { font-style: italic; color: var(--accent); }
+
+  .hero-sub {
+    max-width: 540px;
+    font-size: 13px;
+    color: var(--text-dim);
+    line-height: 1.8;
+    margin-bottom: 2.5rem;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1.25rem;
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    text-decoration: none;
+    border: 1px solid var(--border-hi);
+    color: var(--text-dim);
+    transition: all 0.15s;
+  }
+  .btn:hover { color: var(--text); background: var(--bg-1); }
+  .btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+
+  /* ── SECTION ──────────────────────────────────── */
+  .section { padding: 5rem 0; }
+
+  .section-label {
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .section-label::before {
+    content: '';
+    display: inline-block;
+    width: 24px;
+    height: 1px;
+    background: var(--accent);
+  }
+
+  /* ── SIGNAL GRID (same component as the homepage's Live signal) ── */
+  .signal-bar {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-top: 2rem;
+  }
+  .signal-cell { background: var(--bg); padding: 1.25rem 1.5rem; }
+  .signal-label {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 0.5rem;
+  }
+  .signal-value { font-size: 14px; font-family: var(--mono); transition: color 0.2s; }
+  .signal-value.checking { color: var(--text-dim); }
+  .signal-value.ok { color: var(--green); }
+  .signal-value.fail { color: var(--red); }
+  .signal-caption { font-size: 11px; color: var(--text-faint); margin-top: 0.4rem; }
+
+  .status-footnote {
+    margin-top: 1.5rem;
+    font-size: 11px;
+    color: var(--text-faint);
+  }
+
+  /* ── FOOTER (identical to the homepage footer) ── */
+  footer {
+    padding: 2rem 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    padding-left: clamp(1.5rem,5vw,3rem);
+    padding-right: clamp(1.5rem,5vw,3rem);
+  }
+  .footer-left { font-size: 12px; color: var(--text-faint); }
+  .footer-links { display: flex; gap: 1.5rem; list-style: none; }
+  .footer-links a { font-size: 12px; color: var(--text-dim); text-decoration: none; transition: color 0.15s; }
+  .footer-links a:hover { color: var(--text); }
+
+  /* ── AMBIENT GRID (identical to the homepage) ─── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--text-faint) 1px, transparent 1px),
+      linear-gradient(90deg, var(--text-faint) 1px, transparent 1px);
+    background-size: 80px 80px;
+    opacity: 0.03;
+    pointer-events: none;
+    z-index: 0;
+  }
+  main, nav, footer { position: relative; z-index: 1; }
+
+  @media (max-width: 680px) {
+    .nav-links { display: none; }
+    .hero { padding-top: calc(var(--nav-h) + 3.5rem); }
+  }
+  @media (max-width: 420px) {
+    .hero-heading { font-size: 2.2rem; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="https://atlas-systems.uk" class="nav-wordmark">Atlas<span>_</span>Systems</a>
+  <ul class="nav-links">
+    <li><a href="https://atlas-systems.uk">atlas-systems.uk</a></li>
+  </ul>
+</nav>
+
+<main>
+  <section class="hero">
+    <div class="terminal-line">
+      <span class="terminal-prompt">atlas@status:~$</span>
+      <span id="cmd"></span><span class="cursor"></span>
+    </div>
+
+    <h1 class="hero-heading">Every service,<br>checked <em>live.</em></h1>
+
+    <p class="hero-sub">
+      No screenshots, no cached claims. Each line below is a real request, made from your browser, the moment this page loads, and again every 30 seconds after that.
+    </p>
+
+    <a href="https://atlas-systems.uk" class="btn">
+      <svg viewBox="0 0 24 24"><polyline points="8 6 2 12 8 18"/></svg>
+      Back to atlas-systems.uk
+    </a>
+  </section>
+
+  <section class="section">
+    <div class="section-label">Live signal</div>
+    <div class="signal-bar" id="statusGrid"></div>
+    <p class="status-footnote" id="footerNote">connecting…</p>
+  </section>
+</main>
+
+<footer>
+  <div class="footer-left">status.atlas-systems.uk &mdash; <span id="footer-year"></span></div>
+  <ul class="footer-links">
+    <li><a href="https://github.com/AtlasReaper311" target="_blank" rel="noopener">GitHub</a></li>
+    <li><a href="https://atlas-systems.uk">Home</a></li>
+  </ul>
+</footer>
+
+<script>
+document.getElementById('footer-year').textContent = new Date().getFullYear();
+
+const SERVICES = [
+  { name: "atlas-notify", sub: "event router", url: "https://api.atlas-systems.uk/notify/health" },
+  { name: "github-pulse", sub: "github stats proxy", url: "https://api.atlas-systems.uk/pulse" },
+  { name: "site-pulse", sub: "site analytics proxy", url: "https://api.atlas-systems.uk/site-pulse/health" },
+];
+
+const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const cmdEl = document.getElementById("cmd");
+const gridEl = document.getElementById("statusGrid");
+const noteEl = document.getElementById("footerNote");
+const COMMAND = "watch --infra";
+
+function typeCommand(callback) {
+  if (reducedMotion) { cmdEl.textContent = COMMAND; callback(); return; }
+  let i = 0;
+  const interval = setInterval(() => {
+    cmdEl.textContent = COMMAND.slice(0, ++i);
+    if (i >= COMMAND.length) { clearInterval(interval); setTimeout(callback, 200); }
+  }, 45);
+}
+
+function buildGrid() {
+  gridEl.innerHTML = SERVICES.map((svc, i) => `
+    <div class="signal-cell">
+      <div class="signal-label">${svc.name}</div>
+      <div class="signal-value checking" id="val-${i}">checking…</div>
+      <div class="signal-caption" id="cap-${i}">${svc.sub}</div>
+    </div>
+  `).join("");
+}
+
+async function checkService(svc, i) {
+  const valEl = document.getElementById("val-" + i);
+  const capEl = document.getElementById("cap-" + i);
+  const start = performance.now();
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 6000);
+    const res = await fetch(svc.url, { signal: controller.signal, cache: "no-store" });
+    clearTimeout(timeout);
+    const ms = Math.round(performance.now() - start);
+    if (res.ok) {
+      valEl.textContent = "Operational";
+      valEl.className = "signal-value ok";
+      capEl.textContent = `${svc.sub} · ${ms}ms`;
+    } else {
+      valEl.textContent = "Unreachable";
+      valEl.className = "signal-value fail";
+      capEl.textContent = `${svc.sub} · HTTP ${res.status}`;
+    }
+  } catch {
+    valEl.textContent = "Unreachable";
+    valEl.className = "signal-value fail";
+    capEl.textContent = `${svc.sub} · timeout`;
+  }
+}
+
+async function runChecks() {
+  await Promise.all(SERVICES.map((svc, i) => checkService(svc, i)));
+  const now = new Date();
+  noteEl.textContent = `last checked ${now.toUTCString().slice(17, 25)} UTC · next check in 30s`;
+}
+
+buildGrid();
+typeCommand(() => {
+  runChecks();
+  setInterval(runChecks, 30000);
+});
+</script>
+</body>
+</html>
