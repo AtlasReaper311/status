@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Live status for every Atlas Systems service, checked in your browser, right now.">
+<title>Atlas Systems // status</title>
+<link rel="icon" type="image/png" href="https://raw.githubusercontent.com/AtlasReaper311/AtlasReaper311/main/atlas-icon-dark-32.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --panel: #111118;
+    --border: #2a2a32;
+    --text-dim: #aaa9a0;
+    --text-bright: #e8e6e0;
+    --amber: #f5a623;
+    --green: #4ade80;
+    --red: #e24b4a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text-bright);
+    font-family: 'IBM Plex Mono', monospace;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+  }
+  .terminal {
+    width: 100%;
+    max-width: 640px;
+  }
+  .box {
+    color: var(--amber);
+    font-size: 0.8rem;
+    line-height: 1.5;
+    white-space: pre;
+    overflow-x: auto;
+    margin-bottom: 1.5rem;
+  }
+  .prompt-line {
+    color: var(--text-dim);
+    font-size: 0.9rem;
+    margin-bottom: 1.25rem;
+  }
+  .prompt-line .user { color: var(--green); }
+  .cursor {
+    display: inline-block;
+    width: 0.55em;
+    height: 1em;
+    background: var(--text-bright);
+    margin-left: 2px;
+    vertical-align: text-bottom;
+    animation: blink 1s step-end infinite;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .cursor { animation: none; opacity: 1; }
+  }
+  @keyframes blink { 50% { opacity: 0; } }
+  .panel {
+    border: 1px solid var(--border);
+    background: var(--panel);
+    border-radius: 6px;
+    padding: 1.25rem 1.5rem;
+  }
+  .line {
+    display: grid;
+    grid-template-columns: 4.5em 1fr 4.5em;
+    align-items: center;
+    gap: 0.75em;
+    padding: 0.55em 0;
+    font-size: 0.9rem;
+    border-bottom: 1px solid var(--border);
+    opacity: 0;
+    transform: translateY(4px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  }
+  .line.shown { opacity: 1; transform: translateY(0); }
+  .line:last-child { border-bottom: none; }
+  .tag { font-weight: 600; }
+  .tag.checking { color: var(--text-dim); }
+  .tag.ok { color: var(--green); }
+  .tag.fail { color: var(--red); }
+  .name { color: var(--text-bright); }
+  .name small { display: block; color: var(--text-dim); font-size: 0.75em; margin-top: 0.15em; }
+  .latency { color: var(--text-dim); text-align: right; font-size: 0.85em; }
+  footer {
+    margin-top: 1.25rem;
+    color: var(--text-dim);
+    font-size: 0.78rem;
+  }
+  footer a { color: var(--text-dim); text-decoration: none; }
+  footer a:hover { color: var(--amber); }
+</style>
+</head>
+<body>
+<div class="terminal">
+  <pre class="box">┌─────────────────────────────────────────────┐
+│  ATLAS SYSTEMS // status                    │
+│  every service, checked live in your        │
+│  browser, right now                          │
+└─────────────────────────────────────────────┘</pre>
+
+  <div class="prompt-line">
+    <span class="user">atlas@status</span>:~$ <span id="cmd"></span><span class="cursor"></span>
+  </div>
+
+  <div class="panel" id="services"></div>
+
+  <footer id="footer">connecting…</footer>
+</div>
+
+<script>
+const SERVICES = [
+  { name: "atlas-notify", sub: "event router", url: "https://api.atlas-systems.uk/notify/health" },
+  { name: "github-pulse", sub: "github stats proxy", url: "https://api.atlas-systems.uk/pulse" },
+  { name: "site-pulse", sub: "site analytics proxy", url: "https://api.atlas-systems.uk/site-pulse/health" },
+];
+
+const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const cmdEl = document.getElementById("cmd");
+const servicesEl = document.getElementById("services");
+const footerEl = document.getElementById("footer");
+const COMMAND = "watch --infra";
+
+function typeCommand(callback) {
+  if (reducedMotion) { cmdEl.textContent = COMMAND; callback(); return; }
+  let i = 0;
+  const interval = setInterval(() => {
+    cmdEl.textContent = COMMAND.slice(0, ++i);
+    if (i >= COMMAND.length) { clearInterval(interval); setTimeout(callback, 200); }
+  }, 45);
+}
+
+function buildLines() {
+  servicesEl.innerHTML = "";
+  SERVICES.forEach((svc, idx) => {
+    const line = document.createElement("div");
+    line.className = "line";
+    line.id = "line-" + idx;
+    line.innerHTML = `
+      <span class="tag checking">[ .. ]</span>
+      <span class="name">${svc.name}<small>${svc.sub}</small></span>
+      <span class="latency">—</span>
+    `;
+    servicesEl.appendChild(line);
+    setTimeout(() => line.classList.add("shown"), reducedMotion ? 0 : idx * 120);
+  });
+}
+
+async function checkService(svc, idx) {
+  const line = document.getElementById("line-" + idx);
+  const tag = line.querySelector(".tag");
+  const latency = line.querySelector(".latency");
+  const start = performance.now();
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 6000);
+    const res = await fetch(svc.url, { signal: controller.signal, cache: "no-store" });
+    clearTimeout(timeout);
+    const ms = Math.round(performance.now() - start);
+    if (res.ok) {
+      tag.textContent = "[ OK ]";
+      tag.className = "tag ok";
+      latency.textContent = ms + "ms";
+    } else {
+      tag.textContent = "[FAIL]";
+      tag.className = "tag fail";
+      latency.textContent = "HTTP " + res.status;
+    }
+  } catch {
+    tag.textContent = "[FAIL]";
+    tag.className = "tag fail";
+    latency.textContent = "timeout";
+  }
+}
+
+async function runChecks() {
+  await Promise.all(SERVICES.map((svc, idx) => checkService(svc, idx)));
+  const now = new Date();
+  footerEl.innerHTML = `last checked ${now.toUTCString().slice(17, 25)} UTC · next check in 30s · <a href="https://atlas-systems.uk">atlas-systems.uk</a>`;
+}
+
+buildLines();
+typeCommand(() => {
+  runChecks();
+  setInterval(runChecks, 30000);
+});
+</script>
+</body>
+</html>
