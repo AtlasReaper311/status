@@ -307,11 +307,62 @@
 <script>
 document.getElementById('footer-year').textContent = new Date().getFullYear();
 
-const SERVICES = [
+const FALLBACK_SERVICES = [
+  { name: "atlas-api-public", sub: "public API", url: "https://api.atlas-systems.uk/v1" },
+  { name: "atlas-api-index", sub: "worker registry", url: "https://api.atlas-systems.uk/" },
   { name: "atlas-notify", sub: "event router", url: "https://api.atlas-systems.uk/notify/health" },
   { name: "github-pulse", sub: "github stats proxy", url: "https://api.atlas-systems.uk/pulse" },
   { name: "site-pulse", sub: "site analytics proxy", url: "https://api.atlas-systems.uk/site-pulse/health" },
+  { name: "deploy-watch", sub: "pages deploy monitor", url: "https://api.atlas-systems.uk/deploy-watch/latest" },
+  { name: "specular-telemetry", sub: "hardware telemetry edge", url: "https://api.atlas-systems.uk/specular" },
+  { name: "infra-status", sub: "local infra health", url: "https://api.atlas-systems.uk/v1/infra/status" },
+  { name: "public-api-badge", sub: "estate status badge", url: "https://api.atlas-systems.uk/v1/badge/status" }
 ];
+
+let SERVICES = [...FALLBACK_SERVICES];
+
+async function loadServicesFromRegistry() {
+  try {
+    const res = await fetch("https://api.atlas-systems.uk/v1/registry", {
+      cache: "no-store"
+    });
+
+    if (!res.ok) return;
+
+    const data = await res.json();
+
+    const candidates = Array.isArray(data.services)
+      ? data.services
+      : Array.isArray(data.workers)
+        ? data.workers
+        : Array.isArray(data.registry)
+          ? data.registry
+          : [];
+
+    const discovered = candidates
+      .map((svc) => {
+        const name = svc.name || svc.id || svc.service;
+        const metaUrl = svc.meta_url || svc.metaUrl;
+        const healthUrl = svc.health_url || svc.healthUrl;
+        const url = healthUrl || metaUrl || svc.url;
+
+        if (!name || !url) return null;
+
+        return {
+          name,
+          sub: svc.description || svc.layer || "registry service",
+          url
+        };
+      })
+      .filter(Boolean);
+
+    if (discovered.length > 0) {
+      SERVICES = discovered;
+    }
+  } catch {
+    SERVICES = [...FALLBACK_SERVICES];
+  }
+}
 
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const cmdEl = document.getElementById("cmd");
@@ -370,8 +421,9 @@ async function runChecks() {
   noteEl.textContent = `last checked ${now.toUTCString().slice(17, 25)} UTC · next check in 30s`;
 }
 
-buildGrid();
-typeCommand(() => {
+typeCommand(async () => {
+  await loadServicesFromRegistry();
+  buildGrid();
   runChecks();
   setInterval(runChecks, 30000);
 });
