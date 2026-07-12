@@ -221,6 +221,102 @@
     color: var(--text-faint);
   }
 
+  /* ── SECTION INTRO (shared by the two sections below) ── */
+  .section-intro {
+    max-width: 620px;
+    font-size: 12px;
+    color: var(--text-dim);
+    line-height: 1.8;
+  }
+
+  /* ── SERVICE LEVELS (SLO / error budget) ──────── */
+  .slo-grid { border: 1px solid var(--border); margin-top: 2rem; background: var(--bg); }
+  .slo-row {
+    display: grid;
+    grid-template-columns: minmax(180px, 1.4fr) 80px 130px minmax(170px, 1fr) minmax(150px, 1fr);
+    gap: 1rem;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .slo-row:last-child { border-bottom: none; }
+  .slo-row.head {
+    background: var(--bg-1);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    padding-top: 0.6rem;
+    padding-bottom: 0.6rem;
+  }
+  .slo-name { font-size: 13px; color: var(--text); display: block; }
+  .slo-sub { display: block; font-size: 11px; color: var(--text-faint); }
+  .slo-note-line { display: block; font-size: 11px; color: var(--text-faint); margin-top: 0.35rem; max-width: 260px; }
+  .slo-num { font-size: 13px; }
+  .slo-num.ok { color: var(--green); }
+  .slo-num.warn { color: var(--accent); }
+  .slo-num.blown { color: var(--red); }
+  .slo-num-cell { display: flex; flex-direction: column; }
+  .slo-budget-cell { display: flex; flex-direction: column; gap: 6px; }
+  .slo-track { height: 6px; border: 1px solid var(--border); background: var(--bg-1); position: relative; }
+  .slo-fill { position: absolute; top: 0; bottom: 0; left: 0; background: var(--green); }
+  .slo-fill.warn { background: var(--accent); }
+  .slo-fill.blown { background: var(--red); }
+  .slo-window { font-size: 11px; color: var(--text-faint); }
+  .slo-loading { padding: 1.25rem 1.5rem; font-size: 12px; color: var(--text-faint); }
+  .slo-cell-label { display: none; }
+  @media (max-width: 760px) {
+    .slo-row { grid-template-columns: 1fr; gap: 0.6rem; padding: 1rem 1.25rem; }
+    .slo-row.head { display: none; }
+    .slo-cell-label {
+      display: block;
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+      margin-bottom: 2px;
+    }
+  }
+
+  /* ── RECENT ACTIVITY (atlas-notify ring buffer) ── */
+  .activity-feed { border: 1px solid var(--border); margin-top: 2rem; background: var(--bg); }
+  .activity-row {
+    display: flex;
+    gap: 0.9rem;
+    align-items: baseline;
+    padding: 0.8rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .activity-row:last-child { border-bottom: none; }
+  .activity-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    flex: none;
+    align-self: center;
+    background: var(--text-faint);
+  }
+  .activity-dot.success { background: var(--green); }
+  .activity-dot.warning { background: var(--accent); }
+  .activity-dot.failure { background: var(--red); }
+  .activity-time { flex: none; width: 84px; font-size: 11px; color: var(--text-faint); }
+  .activity-tag {
+    flex: none;
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+    padding: 1px 6px;
+  }
+  .activity-text { font-size: 12px; color: var(--text-dim); min-width: 0; overflow-wrap: anywhere; }
+  .activity-text strong { color: var(--text); font-weight: 500; }
+  .activity-empty, .activity-error { padding: 1.25rem 1.5rem; font-size: 12px; color: var(--text-faint); }
+  .activity-error { color: var(--red); }
+  @media (max-width: 680px) {
+    .activity-row { flex-wrap: wrap; }
+    .activity-time { width: auto; }
+  }
+
   /* ── FOOTER (identical to the homepage footer) ── */
   footer {
     padding: 2rem 0;
@@ -293,6 +389,31 @@
     <div class="section-label">Live signal</div>
     <div class="signal-bar" id="statusGrid"></div>
     <p class="status-footnote" id="footerNote">connecting…</p>
+  </section>
+
+  <section class="section">
+    <div class="section-label">Service levels</div>
+    <p class="section-intro">
+      Formal availability targets against probe history the edge accrues every 10 minutes.
+      The window is honest: measurement began when the counters first deployed, machine-domain
+      targets budget for hardware that sleeps, and a blown budget is displayed, not hidden.
+    </p>
+    <div class="slo-grid" id="sloGrid">
+      <div class="slo-loading">loading service levels…</div>
+    </div>
+    <p class="status-footnote" id="sloNote">reading probe history…</p>
+  </section>
+
+  <section class="section">
+    <div class="section-label">Recent activity</div>
+    <p class="section-intro">
+      The estate event stream, newest first: deploy outcomes, CI results, Worker runtime
+      alerts, and pushes, read from the same ring buffer that feeds the Lab page.
+    </p>
+    <div class="activity-feed" id="activityFeed">
+      <div class="activity-empty">loading events…</div>
+    </div>
+    <p class="status-footnote" id="activityNote">reading event buffer…</p>
   </section>
 </main>
 
@@ -427,6 +548,280 @@ typeCommand(async () => {
   runChecks();
   setInterval(runChecks, 30000);
 });
+
+
+/* .................................................................. */
+/* Service levels: error budget burn-down.                            */
+/* Targets come from /slo.json (this repo, tunable without touching   */
+/* the Worker); counters come from /v1/slo (per-day ok/total buckets  */
+/* accrued by atlas-api-public every 10 minutes). The maths happens   */
+/* here because both inputs arrive labelled: the window, the start    */
+/* date, and every bucket are in the response, so nothing is hidden.  */
+/* .................................................................. */
+
+const SLO_API = "https://api.atlas-systems.uk/v1/slo";
+const SLO_CONFIG_URL = "/slo.json";
+const SLO_POLL_MS = 300000;
+
+const sloGridEl = document.getElementById("sloGrid");
+const sloNoteEl = document.getElementById("sloNote");
+let sloConfig = null;
+let lastSloRendered = false;
+
+function sloLabelled(className, labelText) {
+  const cell = document.createElement("div");
+  cell.className = className;
+  const label = document.createElement("span");
+  label.className = "slo-cell-label";
+  label.textContent = labelText;
+  cell.appendChild(label);
+  return cell;
+}
+
+function sloValue(cell, text, className) {
+  const value = document.createElement("span");
+  value.className = className;
+  value.textContent = text;
+  cell.appendChild(value);
+  return value;
+}
+
+function sloHeader() {
+  const head = document.createElement("div");
+  head.className = "slo-row head";
+  const labels = ["service", "target", "actual", "error budget", "window"];
+  for (const text of labels) {
+    const cell = document.createElement("div");
+    cell.textContent = text;
+    head.appendChild(cell);
+  }
+  return head;
+}
+
+function budgetClass(remaining) {
+  if (remaining <= 0) return "blown";
+  if (remaining <= 25) return "warn";
+  return "ok";
+}
+
+function sloRow(cfg, comp, windowDays) {
+  const row = document.createElement("div");
+  row.className = "slo-row";
+
+  const nameCell = document.createElement("div");
+  const name = document.createElement("span");
+  name.className = "slo-name";
+  name.textContent = cfg.id;
+  nameCell.appendChild(name);
+  const sub = document.createElement("span");
+  sub.className = "slo-sub";
+  sub.textContent = cfg.sub;
+  nameCell.appendChild(sub);
+  if (cfg.note) {
+    const note = document.createElement("span");
+    note.className = "slo-note-line";
+    note.textContent = cfg.note;
+    nameCell.appendChild(note);
+  }
+  row.appendChild(nameCell);
+
+  const targetCell = sloLabelled("slo-num-cell", "target");
+  sloValue(targetCell, cfg.target_pct + "%", "slo-num");
+  row.appendChild(targetCell);
+
+  const actualCell = sloLabelled("slo-num-cell", "actual");
+  const budgetCell = sloLabelled("slo-budget-cell", "error budget");
+  const windowCell = sloLabelled("slo-num-cell", "window");
+
+  if (!comp || !comp.total) {
+    sloValue(actualCell, "no data yet", "slo-window");
+    sloValue(budgetCell, "accrual begins on the next probe pass", "slo-window");
+    sloValue(windowCell, "0 of " + windowDays + " days", "slo-window");
+  } else {
+    const actualPct = (comp.ok / comp.total) * 100;
+    const actualClass = actualPct >= cfg.target_pct ? "ok" : "blown";
+    sloValue(actualCell, actualPct.toFixed(2) + "%", "slo-num " + actualClass);
+    if (Number.isFinite(comp.avg_ms)) {
+      sloValue(actualCell, "avg probe " + comp.avg_ms + "ms", "slo-sub");
+    }
+
+    /* Budget maths over the observed window: allowed failures are    */
+    /* (1 - target) of all probes taken; what is left of that         */
+    /* allowance is the remaining budget. Negative means exhausted,   */
+    /* and negative is displayed as plainly as healthy.               */
+    const allowedBad = comp.total * (1 - cfg.target_pct / 100);
+    const actualBad = comp.total - comp.ok;
+    let remaining;
+    if (allowedBad > 0) {
+      remaining = ((allowedBad - actualBad) / allowedBad) * 100;
+    } else {
+      remaining = actualBad === 0 ? 100 : -100;
+    }
+
+    const track = document.createElement("div");
+    track.className = "slo-track";
+    const fill = document.createElement("div");
+    fill.className = "slo-fill " + budgetClass(remaining);
+    fill.style.width = Math.max(0, Math.min(100, remaining)) + "%";
+    track.appendChild(fill);
+    budgetCell.appendChild(track);
+    const budgetText = remaining <= 0
+      ? "exhausted (" + Math.round(remaining) + "%)"
+      : Math.round(remaining) + "% remaining";
+    sloValue(budgetCell, budgetText, "slo-num " + budgetClass(remaining));
+
+    const windowText = comp.days_observed >= windowDays
+      ? windowDays + " day window"
+      : comp.days_observed + " of " + windowDays + " days · since " + comp.first_day;
+    sloValue(windowCell, windowText, "slo-window");
+  }
+
+  row.appendChild(actualCell);
+  row.appendChild(budgetCell);
+  row.appendChild(windowCell);
+  return row;
+}
+
+function renderSlo(data) {
+  sloGridEl.innerHTML = "";
+  sloGridEl.appendChild(sloHeader());
+  const windowDays = data.window_days || sloConfig.window_days;
+  for (const cfg of sloConfig.services) {
+    const comp = data.components ? data.components[cfg.component] : null;
+    sloGridEl.appendChild(sloRow(cfg, comp, windowDays));
+  }
+  lastSloRendered = true;
+  sloNoteEl.textContent = data.measuring_since
+    ? "counters accrue every 10 minutes at the edge · measuring since " + String(data.measuring_since).slice(0, 10)
+    : "no probe history yet · counters begin with the next edge cron pass";
+}
+
+async function pollSlo() {
+  try {
+    if (!sloConfig) {
+      const cfgRes = await fetch(SLO_CONFIG_URL, { cache: "no-store" });
+      if (!cfgRes.ok) throw new Error("config " + cfgRes.status);
+      sloConfig = await cfgRes.json();
+    }
+    const res = await fetch(SLO_API, { cache: "no-store" });
+    if (!res.ok) throw new Error("api " + res.status);
+    renderSlo(await res.json());
+  } catch {
+    if (lastSloRendered) {
+      sloNoteEl.textContent = "data stale; last successful read kept on screen";
+      return;
+    }
+    sloGridEl.innerHTML = "";
+    const err = document.createElement("div");
+    err.className = "activity-error";
+    err.textContent = "Service level data unavailable; the probe history endpoint did not answer.";
+    sloGridEl.appendChild(err);
+    sloNoteEl.textContent = "will retry in 5 minutes";
+  }
+}
+
+pollSlo();
+setInterval(pollSlo, SLO_POLL_MS);
+
+/* .................................................................. */
+/* Recent activity: the atlas-notify ring buffer, newest first.       */
+/* Same store the Lab page's Failure feed reads; this view shows all  */
+/* levels rather than filtering to warnings and failures. Fifty is    */
+/* the endpoint's page ceiling, which suits a recent-activity view;   */
+/* older entries fall off and Discord remains the archive.            */
+/* .................................................................. */
+
+const ACTIVITY_API = "https://api.atlas-systems.uk/notify/recent";
+const ACTIVITY_LIMIT = 50;
+const ACTIVITY_POLL_MS = 60000;
+const ACTIVITY_LEVELS = { success: true, info: true, warning: true, failure: true };
+
+const activityFeedEl = document.getElementById("activityFeed");
+const activityNoteEl = document.getElementById("activityNote");
+let lastActivityRendered = false;
+
+function relTime(iso) {
+  const t = Date.parse(iso);
+  if (!Number.isFinite(t)) return "";
+  const diff = Date.now() - t;
+  if (diff < 60000) return "just now";
+  if (diff < 3600000) return Math.floor(diff / 60000) + "m ago";
+  if (diff < 86400000) return Math.floor(diff / 3600000) + "h ago";
+  return Math.floor(diff / 86400000) + "d ago";
+}
+
+function renderActivity(events) {
+  activityFeedEl.innerHTML = "";
+  if (!events.length) {
+    const empty = document.createElement("div");
+    empty.className = "activity-empty";
+    empty.textContent = "No events in the recent buffer.";
+    activityFeedEl.appendChild(empty);
+    return;
+  }
+  for (const e of events) {
+    const row = document.createElement("div");
+    row.className = "activity-row";
+
+    const dot = document.createElement("span");
+    dot.className = "activity-dot " + (ACTIVITY_LEVELS[e.level] ? e.level : "info");
+    row.appendChild(dot);
+
+    const time = document.createElement("span");
+    time.className = "activity-time";
+    time.textContent = relTime(e.ts);
+    time.title = e.ts || "";
+    row.appendChild(time);
+
+    const tag = document.createElement("span");
+    tag.className = "activity-tag";
+    tag.textContent = [e.dialect, e.event].filter(Boolean).join(" · ") || "event";
+    row.appendChild(tag);
+
+    const text = document.createElement("span");
+    text.className = "activity-text";
+    const title = document.createElement("strong");
+    title.textContent = e.title || "(untitled event)";
+    text.appendChild(title);
+    if (e.message) {
+      text.appendChild(document.createTextNode(" " + e.message));
+    }
+    row.appendChild(text);
+
+    activityFeedEl.appendChild(row);
+  }
+}
+
+async function pollActivity() {
+  try {
+    const res = await fetch(
+      ACTIVITY_API + "?limit=" + ACTIVITY_LIMIT + "&t=" + Date.now(),
+      { cache: "no-store" }
+    );
+    if (!res.ok) throw new Error("feed " + res.status);
+    const data = await res.json();
+    const events = Array.isArray(data.events) ? data.events : [];
+    renderActivity(events);
+    lastActivityRendered = true;
+    const buffered = Number.isFinite(data.total) ? data.total : events.length;
+    activityNoteEl.textContent =
+      "showing " + events.length + " of " + buffered + " buffered events · refreshes every 60s";
+  } catch {
+    if (lastActivityRendered) {
+      activityNoteEl.textContent = "feed stale; last successful read kept on screen";
+      return;
+    }
+    activityFeedEl.innerHTML = "";
+    const err = document.createElement("div");
+    err.className = "activity-error";
+    err.textContent = "Feed unavailable; the event router did not answer.";
+    activityFeedEl.appendChild(err);
+    activityNoteEl.textContent = "will retry in 60s";
+  }
+}
+
+pollActivity();
+setInterval(pollActivity, ACTIVITY_POLL_MS);
 </script>
 </body>
 </html>

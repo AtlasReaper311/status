@@ -1,0 +1,78 @@
+{
+  "window_days": 30,
+  "services": [
+    {
+      "id": "ramone-memory",
+      "component": "machine",
+      "target_pct": 75,
+      "sub": "ollama memory proxy",
+      "domain": "machine",
+      "note": "LAN-only by design; measured through the SPECULAR-CORE sentinel verdict, the same mapping specular-sonify uses"
+    },
+    {
+      "id": "atlas-corpus",
+      "component": "corpus",
+      "target_pct": 75,
+      "sub": "estate RAG service",
+      "domain": "machine"
+    },
+    {
+      "id": "specular-telemetry",
+      "component": "specular",
+      "target_pct": 75,
+      "sub": "telemetry pipeline",
+      "domain": "machine",
+      "note": "judged end to end; the Worker up with the tunnel down counts as down"
+    },
+    {
+      "id": "atlas-api-index",
+      "component": "registry",
+      "target_pct": 99.5,
+      "sub": "worker registry",
+      "domain": "edge"
+    },
+    {
+      "id": "ramone-trigger",
+      "component": "ramone_trigger",
+      "target_pct": 99.5,
+      "sub": "voice deploy trigger",
+      "domain": "edge"
+    },
+    {
+      "id": "specular-edge",
+      "component": "specular_edge",
+      "target_pct": 99.5,
+      "sub": "telemetry edge worker",
+      "domain": "edge"
+    },
+    {
+      "id": "atlas-notify",
+      "component": "notify",
+      "target_pct": 99.5,
+      "sub": "event router",
+      "domain": "edge"
+    },
+    {
+      "id": "github-pulse",
+      "component": "github_pulse",
+      "target_pct": 99,
+      "sub": "github stats proxy",
+      "domain": "edge",
+      "note": "target allows for upstream GitHub API weather"
+    },
+    {
+      "id": "site-pulse",
+      "component": "site_pulse",
+      "target_pct": 99,
+      "sub": "site analytics proxy",
+      "domain": "edge"
+    },
+    {
+      "id": "deploy-watch",
+      "component": "deploy_watch",
+      "target_pct": 99,
+      "sub": "pages deploy monitor",
+      "domain": "edge"
+    }
+  ]
+}
