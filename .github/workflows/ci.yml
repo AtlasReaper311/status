@@ -1,0 +1,64 @@
+name: Pull request CI
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.repository }}-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  static-validation:
+    name: Status site validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "22"
+
+      - name: Validate HTML and the SLO contract
+        run: |
+          npx --yes html-validate@9.7.1 index.html
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          document = json.loads(Path("slo.json").read_text(encoding="utf-8"))
+          if not isinstance(document.get("window_days"), int) or document["window_days"] <= 0:
+              raise SystemExit("slo.json window_days must be a positive integer")
+          services = document.get("services")
+          if not isinstance(services, list) or not services:
+              raise SystemExit("slo.json services must be a non-empty array")
+          required = {"id", "component", "target_pct", "sub", "domain"}
+          ids = set()
+          components = set()
+          for index, service in enumerate(services):
+              missing = required.difference(service)
+              if missing:
+                  raise SystemExit(f"service {index} is missing: {sorted(missing)}")
+              if service["id"] in ids or service["component"] in components:
+                  raise SystemExit("service ids and components must be unique")
+              ids.add(service["id"])
+              components.add(service["component"])
+              if service["domain"] not in {"edge", "machine"}:
+                  raise SystemExit("service domain must be edge or machine")
+              if not isinstance(service["target_pct"], (int, float)) or not 0 < service["target_pct"] <= 100:
+                  raise SystemExit("target_pct must be within (0, 100]")
+          html = Path("index.html").read_text(encoding="utf-8")
+          if "slo.json" not in html:
+              raise SystemExit("index.html does not consume slo.json")
+          PY
+
+      - name: Check repository links offline
+        uses: lycheeverse/lychee-action@8646ba30535128ac92d33dfc9133794bfdd9b411 # v2.8.0
+        with:
+          args: "--offline --no-progress --include-fragments --root-dir ${{ github.workspace }} ."
+          fail: true
