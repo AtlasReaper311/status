@@ -262,6 +262,9 @@
   .slo-fill { position: absolute; top: 0; bottom: 0; left: 0; background: var(--green); }
   .slo-fill.warn { background: var(--accent); }
   .slo-fill.blown { background: var(--red); }
+  .slo-fill.muted { background: var(--border); }
+  .slo-num.muted { color: var(--text-faint); }
+  .slo-state { text-transform: lowercase; }
   .slo-window { font-size: 11px; color: var(--text-faint); }
   .slo-loading { padding: 1.25rem 1.5rem; font-size: 12px; color: var(--text-faint); }
   .slo-cell-label { display: none; }
@@ -401,7 +404,7 @@
     <div class="slo-grid" id="sloGrid">
       <div class="slo-loading">loading service levels…</div>
     </div>
-    <p class="status-footnote" id="sloNote">reading probe history…</p>
+    <p class="status-footnote" id="sloNote" role="status">reading derived reliability…</p>
   </section>
 
   <section class="section">
@@ -551,177 +554,12 @@ typeCommand(async () => {
 
 
 /* .................................................................. */
-/* Service levels: error budget burn-down.                            */
-/* Targets come from /slo.json (this repo, tunable without touching   */
-/* the Worker); counters come from /v1/slo (per-day ok/total buckets  */
-/* accrued by atlas-api-public every 10 minutes). The maths happens   */
-/* here because both inputs arrive labelled: the window, the start    */
-/* date, and every bucket are in the response, so nothing is hidden.  */
+/* Service levels moved to js/reliability.js: the page now renders    */
+/* derived verdicts from /v1/reliability instead of recomputing       */
+/* budgets client-side, so the estate has one budget calculation.     */
+/* slo.json remains the row configuration and is generated from the   */
+/* canonical policy in atlas-infra.                                   */
 /* .................................................................. */
-
-const SLO_API = "https://api.atlas-systems.uk/v1/slo";
-const SLO_CONFIG_URL = "/slo.json";
-const SLO_POLL_MS = 300000;
-
-const sloGridEl = document.getElementById("sloGrid");
-const sloNoteEl = document.getElementById("sloNote");
-let sloConfig = null;
-let lastSloRendered = false;
-
-function sloLabelled(className, labelText) {
-  const cell = document.createElement("div");
-  cell.className = className;
-  const label = document.createElement("span");
-  label.className = "slo-cell-label";
-  label.textContent = labelText;
-  cell.appendChild(label);
-  return cell;
-}
-
-function sloValue(cell, text, className) {
-  const value = document.createElement("span");
-  value.className = className;
-  value.textContent = text;
-  cell.appendChild(value);
-  return value;
-}
-
-function sloHeader() {
-  const head = document.createElement("div");
-  head.className = "slo-row head";
-  const labels = ["service", "target", "actual", "error budget", "window"];
-  for (const text of labels) {
-    const cell = document.createElement("div");
-    cell.textContent = text;
-    head.appendChild(cell);
-  }
-  return head;
-}
-
-function budgetClass(remaining) {
-  if (remaining <= 0) return "blown";
-  if (remaining <= 25) return "warn";
-  return "ok";
-}
-
-function sloRow(cfg, comp, windowDays) {
-  const row = document.createElement("div");
-  row.className = "slo-row";
-
-  const nameCell = document.createElement("div");
-  const name = document.createElement("span");
-  name.className = "slo-name";
-  name.textContent = cfg.id;
-  nameCell.appendChild(name);
-  const sub = document.createElement("span");
-  sub.className = "slo-sub";
-  sub.textContent = cfg.sub;
-  nameCell.appendChild(sub);
-  if (cfg.note) {
-    const note = document.createElement("span");
-    note.className = "slo-note-line";
-    note.textContent = cfg.note;
-    nameCell.appendChild(note);
-  }
-  row.appendChild(nameCell);
-
-  const targetCell = sloLabelled("slo-num-cell", "target");
-  sloValue(targetCell, cfg.target_pct + "%", "slo-num");
-  row.appendChild(targetCell);
-
-  const actualCell = sloLabelled("slo-num-cell", "actual");
-  const budgetCell = sloLabelled("slo-budget-cell", "error budget");
-  const windowCell = sloLabelled("slo-num-cell", "window");
-
-  if (!comp || !comp.total) {
-    sloValue(actualCell, "no data yet", "slo-window");
-    sloValue(budgetCell, "accrual begins on the next probe pass", "slo-window");
-    sloValue(windowCell, "0 of " + windowDays + " days", "slo-window");
-  } else {
-    const actualPct = (comp.ok / comp.total) * 100;
-    const actualClass = actualPct >= cfg.target_pct ? "ok" : "blown";
-    sloValue(actualCell, actualPct.toFixed(2) + "%", "slo-num " + actualClass);
-    if (Number.isFinite(comp.avg_ms)) {
-      sloValue(actualCell, "avg probe " + comp.avg_ms + "ms", "slo-sub");
-    }
-
-    /* Budget maths over the observed window: allowed failures are    */
-    /* (1 - target) of all probes taken; what is left of that         */
-    /* allowance is the remaining budget. Negative means exhausted,   */
-    /* and negative is displayed as plainly as healthy.               */
-    const allowedBad = comp.total * (1 - cfg.target_pct / 100);
-    const actualBad = comp.total - comp.ok;
-    let remaining;
-    if (allowedBad > 0) {
-      remaining = ((allowedBad - actualBad) / allowedBad) * 100;
-    } else {
-      remaining = actualBad === 0 ? 100 : -100;
-    }
-
-    const track = document.createElement("div");
-    track.className = "slo-track";
-    const fill = document.createElement("div");
-    fill.className = "slo-fill " + budgetClass(remaining);
-    fill.style.width = Math.max(0, Math.min(100, remaining)) + "%";
-    track.appendChild(fill);
-    budgetCell.appendChild(track);
-    const budgetText = remaining <= 0
-      ? "exhausted (" + Math.round(remaining) + "%)"
-      : Math.round(remaining) + "% remaining";
-    sloValue(budgetCell, budgetText, "slo-num " + budgetClass(remaining));
-
-    const windowText = comp.days_observed >= windowDays
-      ? windowDays + " day window"
-      : comp.days_observed + " of " + windowDays + " days · since " + comp.first_day;
-    sloValue(windowCell, windowText, "slo-window");
-  }
-
-  row.appendChild(actualCell);
-  row.appendChild(budgetCell);
-  row.appendChild(windowCell);
-  return row;
-}
-
-function renderSlo(data) {
-  sloGridEl.innerHTML = "";
-  sloGridEl.appendChild(sloHeader());
-  const windowDays = data.window_days || sloConfig.window_days;
-  for (const cfg of sloConfig.services) {
-    const comp = data.components ? data.components[cfg.component] : null;
-    sloGridEl.appendChild(sloRow(cfg, comp, windowDays));
-  }
-  lastSloRendered = true;
-  sloNoteEl.textContent = data.measuring_since
-    ? "counters accrue every 10 minutes at the edge · measuring since " + String(data.measuring_since).slice(0, 10)
-    : "no probe history yet · counters begin with the next edge cron pass";
-}
-
-async function pollSlo() {
-  try {
-    if (!sloConfig) {
-      const cfgRes = await fetch(SLO_CONFIG_URL, { cache: "no-store" });
-      if (!cfgRes.ok) throw new Error("config " + cfgRes.status);
-      sloConfig = await cfgRes.json();
-    }
-    const res = await fetch(SLO_API, { cache: "no-store" });
-    if (!res.ok) throw new Error("api " + res.status);
-    renderSlo(await res.json());
-  } catch {
-    if (lastSloRendered) {
-      sloNoteEl.textContent = "data stale; last successful read kept on screen";
-      return;
-    }
-    sloGridEl.innerHTML = "";
-    const err = document.createElement("div");
-    err.className = "activity-error";
-    err.textContent = "Service level data unavailable; the probe history endpoint did not answer.";
-    sloGridEl.appendChild(err);
-    sloNoteEl.textContent = "will retry in 5 minutes";
-  }
-}
-
-pollSlo();
-setInterval(pollSlo, SLO_POLL_MS);
 
 /* .................................................................. */
 /* Recent activity: the atlas-notify ring buffer, newest first.       */
@@ -822,6 +660,10 @@ async function pollActivity() {
 
 pollActivity();
 setInterval(pollActivity, ACTIVITY_POLL_MS);
+</script>
+<script type="module">
+  import { mountServiceLevels } from "./js/reliability.js";
+  mountServiceLevels();
 </script>
 </body>
 </html>

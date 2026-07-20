@@ -1,5 +1,7 @@
 {
   "window_days": 30,
+  "generated_from": "AtlasReaper311/atlas-infra:policy/reliability",
+  "policy_fingerprint": "a279dca1767367f78d91d185f6902dcbdd77b3d64c6b7c3ddbf4e671834e5b3e",
   "services": [
     {
       "id": "ramone-memory",
@@ -73,6 +75,28 @@
       "target_pct": 99,
       "sub": "pages deploy monitor",
       "domain": "edge"
+    },
+    {
+      "id": "atlas-systems",
+      "component": "atlas_systems",
+      "target_pct": 99.5,
+      "sub": "portfolio site",
+      "domain": "edge"
+    },
+    {
+      "id": "atlas-doc-viewer",
+      "component": "atlas_doc_viewer",
+      "target_pct": 99.5,
+      "sub": "document viewer",
+      "domain": "edge"
+    },
+    {
+      "id": "status",
+      "component": "status_surface",
+      "target_pct": 99.5,
+      "sub": "status page",
+      "domain": "edge",
+      "note": "measured externally by the API worker, so the page reporting on itself relies on that outside view"
     }
   ]
 }

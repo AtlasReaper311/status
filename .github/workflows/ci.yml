@@ -53,9 +53,17 @@ jobs:
               if not isinstance(service["target_pct"], (int, float)) or not 0 < service["target_pct"] <= 100:
                   raise SystemExit("target_pct must be within (0, 100]")
           html = Path("index.html").read_text(encoding="utf-8")
-          if "slo.json" not in html:
-              raise SystemExit("index.html does not consume slo.json")
+          module = Path("js/reliability.js").read_text(encoding="utf-8")
+          if "js/reliability.js" not in html:
+              raise SystemExit("index.html does not load the service-levels module")
+          if "slo.json" not in module:
+              raise SystemExit("js/reliability.js does not consume slo.json")
+          if "/v1/reliability" not in module:
+              raise SystemExit("js/reliability.js does not consume the derived reliability API")
           PY
+
+      - name: Run service-levels module tests
+        run: node --test test/reliability.test.mjs
 
       - name: Check repository links offline
         uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
