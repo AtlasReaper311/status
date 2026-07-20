@@ -25,9 +25,9 @@ The live signal grid reads from the same registry and public API surface as the 
 
 ## Service levels
 
-SLO targets live in [`slo.json`](slo.json) in this repo, so tuning a target is a one-line commit here and never a Worker change. The counters behind them come from `api.atlas-systems.uk/v1/slo`: [`atlas-api-public`](https://github.com/AtlasReaper311/atlas-api-public) probes ten estate components every 10 minutes on its cron, accrues per-day `ok/total` buckets into a single KV document, records round-trip milliseconds for successful probes, and prunes buckets older than the 30 day rolling window. That store predates this page (it was built for `/v1/stats`); this page adds coverage and a raw read route rather than a second store.
+SLO targets are canonical in [`atlas-infra`](https://github.com/AtlasReaper311/atlas-infra) under `policy/reliability/objectives/`, and [`slo.json`](slo.json) here is a generated projection of them: the row list, labels, notes, and ordering the page renders, carrying the policy fingerprint it was rendered from. Tuning a target is now a reviewed policy change in atlas-infra followed by regenerating this file (`python3 scripts/reliability_policy.py emit-status-slo`), so the presentation can never quietly disagree with approved policy.
 
-The error budget maths runs client-side because every input arrives labelled: the window, the measurement start date, and every day bucket are in the response. For a target T over N probes, the allowance is `(1 - T) x N` failures; what remains of that allowance is the remaining budget, and a negative number renders as plainly as a healthy one.
+The calculation authority moved with it. The page reads derived verdicts from `api.atlas-systems.uk/v1/reliability`, where [`atlas-api-public`](https://github.com/AtlasReaper311/atlas-api-public) evaluates the same per-day probe counters every ten minutes with the estate's one canonical budget mathematics: error budget remaining, fast and slow day-granular burn rates, measurement coverage, and an explicit state per objective (`meeting objective`, `budget at risk`, `budget exhausted`, `insufficient evidence`, `stale evidence`, `source unavailable`, `malformed evidence`, `unmeasured`). The raw counters remain public at `/v1/slo` for anyone who wants to check the derivation; the page no longer recomputes budgets client-side, because two implementations of the same maths would eventually disagree, and the derived one is pinned to the canonical atlas-infra reference by shared test vectors.
 
 Two target tiers, on purpose. Edge Workers carry 99 to 99.5 percent targets because they run 24/7 on Cloudflare. Machine-domain services (`atlas-corpus`, `specular-telemetry`, and `ramone-memory` via the sentinel verdict) carry 75 percent, because the machine that runs them sleeps, and a target the service can never meet by design is theatre, not engineering. `ramone-memory` is LAN-only by design and cannot be probed from the edge at all; it is measured through the `SPECULAR-CORE` sentinel verdict, the same mapping [`specular-sonify`](https://github.com/AtlasReaper311/specular-sonify) already uses, and the page says so on the row.
 
@@ -35,8 +35,8 @@ Two target tiers, on purpose. Edge Workers carry 99 to 99.5 percent targets beca
 
 Three rules the page holds itself to, both new sections:
 
-1. A service with fewer observed days than the window says so explicitly (`3 of 30 days · since 2026-07-10`) instead of presenting a misleadingly precise 30 day figure computed from three days of data. A component with no counters yet says `no data yet`, not zero percent.
-2. If the probe history endpoint or the event feed is unreachable, the page shows a clear unavailable state on first load, and keeps the last successful read on screen (marked stale) on later failures. A failed poll never silently empties a section.
+1. A service with fewer observed days than the window says so explicitly (`3 of 30 days · since 2026-07-10`) instead of presenting a misleadingly precise 30 day figure computed from three days of data, and measurement coverage is shown beside every verdict. A service with no counters says `no data`, not zero percent, and a service without an approved objective says `unmeasured` with its reason.
+2. If the derived endpoint or the event feed is unreachable, the page shows a clear unavailable state on first load, and keeps the last successful read on screen (marked stale) on later failures. A failed poll never silently empties a section, and a report past its freshness bound says so in the footer.
 3. A blown error budget is the entire point of the feature, not an error state to hide. It renders in red, with the negative percentage, as plainly as a healthy budget renders in green.
 
 ## Recent activity
@@ -49,8 +49,10 @@ Reusing that buffer was a decision, not a shortcut. A second event store would n
 
 ```bash
 curl https://status.atlas-systems.uk
+curl https://api.atlas-systems.uk/v1/reliability
 curl https://api.atlas-systems.uk/v1/slo
 curl "https://api.atlas-systems.uk/notify/recent?limit=50"
+node --test test/reliability.test.mjs
 ```
 
 ## How it fits into Atlas Systems
