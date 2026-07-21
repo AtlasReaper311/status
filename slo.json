@@ -1,7 +1,7 @@
 {
   "window_days": 30,
   "generated_from": "AtlasReaper311/atlas-infra:policy/reliability",
-  "policy_fingerprint": "a279dca1767367f78d91d185f6902dcbdd77b3d64c6b7c3ddbf4e671834e5b3e",
+  "policy_fingerprint": "26ec13f4c15bd9c520f21e88aeec9f0c7718c2a01c65461c0a86f0905238c4ee",
   "services": [
     {
       "id": "ramone-memory",
