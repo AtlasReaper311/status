@@ -1,0 +1,203 @@
+:root {
+  --text-dim: #aaa9a0;
+  --text-faint: #77776f;
+  --atlas-focus: #f5a623;
+}
+
+nav[aria-label="Primary navigation"] {
+  height: auto;
+  min-height: var(--nav-h, 56px);
+  gap: 1rem;
+}
+
+.atlas-brand-cluster {
+  display: inline-flex;
+  align-items: center;
+  gap: .75rem;
+  min-width: 0;
+}
+
+.atlas-estate-status {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  min-height: 28px;
+  padding: .2rem .55rem;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  font-size: 9px;
+  line-height: 1;
+  letter-spacing: .08em;
+  text-decoration: none;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.atlas-estate-status:hover,
+.atlas-estate-status:focus-visible {
+  color: var(--text);
+  border-color: var(--border-hi);
+}
+
+.atlas-estate-status-dot {
+  width: 7px;
+  height: 7px;
+  flex: 0 0 7px;
+  border-radius: 50%;
+  background: var(--text-faint);
+}
+.atlas-estate-status[data-state="nominal"] .atlas-estate-status-dot { background: var(--green); box-shadow: 0 0 0 3px rgba(74,222,128,.12); }
+.atlas-estate-status[data-state="degraded"] .atlas-estate-status-dot,
+.atlas-estate-status[data-state="checking"] .atlas-estate-status-dot { background: var(--accent); box-shadow: 0 0 0 3px rgba(245,166,35,.12); }
+.atlas-estate-status[data-state="unavailable"] .atlas-estate-status-dot { background: var(--red); box-shadow: 0 0 0 3px rgba(226,75,74,.12); }
+
+.nav-links {
+  align-items: center;
+}
+
+.nav-links a[aria-current="page"] {
+  color: var(--text);
+}
+
+.status-search-button {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  min-height: 36px;
+  padding: .35rem .65rem;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-dim);
+  font: inherit;
+  font-size: 10px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.status-search-button:hover,
+.status-search-button:focus-visible { color: var(--text); border-color: var(--border-hi); }
+.status-search-button svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 1.5; }
+.status-search-button kbd { color: var(--text-faint); font: inherit; font-size: 8px; }
+
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--atlas-focus);
+  outline-offset: 3px;
+}
+
+.atlas-product-strip {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 1rem;
+  min-height: 42px;
+  margin-top: var(--nav-h, 56px);
+  padding: .65rem clamp(1.5rem, 5vw, 3rem);
+  border-bottom: 1px solid var(--border);
+  background: rgba(17,17,24,.88);
+  color: var(--text-dim);
+  font-size: 10px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.atlas-product-strip strong { color: var(--accent); font-weight: 500; }
+.atlas-product-strip time { color: var(--text-faint); }
+
+.atlas-search-root {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: start center;
+  padding: min(12vh, 7rem) 1rem 1rem;
+}
+.atlas-search-root[hidden] { display: none; }
+.atlas-search-scrim {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: rgba(4,4,8,.82);
+  backdrop-filter: blur(8px);
+  cursor: default;
+}
+.atlas-search-panel {
+  position: relative;
+  width: min(720px, 100%);
+  max-height: min(720px, 78vh);
+  overflow: auto;
+  padding: 1.25rem;
+  border: 1px solid var(--border-hi);
+  background: var(--bg-1);
+  box-shadow: 0 24px 80px rgba(0,0,0,.45);
+}
+.atlas-search-heading { margin-bottom: .75rem; color: var(--accent); font-size: 10px; letter-spacing: .14em; }
+.atlas-search-input {
+  width: 100%;
+  min-height: 48px;
+  padding: .75rem 1rem;
+  border: 1px solid var(--border-hi);
+  background: var(--bg-2);
+  color: var(--text);
+  font: inherit;
+}
+.atlas-search-status { min-height: 1.5rem; margin: .65rem 0; color: var(--text-dim); font-size: 11px; }
+.atlas-search-results { display: grid; gap: 1px; margin: 0; padding: 0; list-style: none; background: var(--border); }
+.atlas-search-result { background: var(--bg); }
+.atlas-search-result-main { display: grid; gap: .4rem; padding: .9rem 1rem; color: var(--text-dim); text-decoration: none; }
+.atlas-search-result-main:hover,
+.atlas-search-result-main:focus-visible { background: var(--bg-2); color: var(--text); }
+.atlas-search-result-main strong { color: var(--text); font-size: 11px; overflow-wrap: anywhere; }
+.atlas-search-result-main span { font-size: 11px; line-height: 1.65; }
+.atlas-search-close { margin-top: 1rem; min-height: 40px; padding: .55rem .9rem; border: 1px solid var(--border-hi); background: var(--bg-2); color: var(--text); font: inherit; cursor: pointer; }
+body.atlas-search-open { overflow: hidden; }
+
+@media (max-width: 760px) {
+  nav[aria-label="Primary navigation"] {
+    position: fixed;
+    align-items: stretch;
+    flex-direction: column;
+    padding-block: .75rem;
+  }
+  .nav-links {
+    display: grid !important;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    width: 100%;
+  }
+  .nav-links li { min-width: 0; }
+  .nav-links a,
+  .status-search-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: .4rem .2rem;
+    font-size: 9px;
+    text-align: center;
+  }
+  .status-search-button span,
+  .status-search-button kbd { display: none; }
+  .atlas-product-strip {
+    grid-template-columns: 1fr auto;
+    margin-top: 118px;
+  }
+  .atlas-product-strip span:nth-child(2) { grid-column: 1 / -1; grid-row: 2; }
+  .hero { padding-top: 3.5rem !important; }
+}
+
+@media (max-width: 420px) {
+  .atlas-estate-status-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; }
+  .atlas-estate-status { width: 32px; justify-content: center; padding: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto !important; }
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

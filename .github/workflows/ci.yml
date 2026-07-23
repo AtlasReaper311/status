@@ -2,6 +2,7 @@ name: Pull request CI
 
 on:
   pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -57,13 +58,39 @@ jobs:
           if "js/reliability.js" not in html:
               raise SystemExit("index.html does not load the service-levels module")
           if "slo.json" not in module:
-              raise SystemExit("js/reliability.js does not consume slo.json")
+              raise SystemExit("js/reliability.js does not preserve the slo.json consumer contract")
           if "/v1/reliability" not in module:
-              raise SystemExit("js/reliability.js does not consume the derived reliability API")
+              raise SystemExit("js/reliability.js does not preserve the derived reliability API contract")
           PY
 
-      - name: Run service-levels module tests
-        run: node --test test/reliability.test.mjs
+      - name: Run module tests
+        run: node --test test/*.test.mjs
+
+      - name: Check browser icon package when synchronized
+        run: |
+          set -euo pipefail
+          expected=(
+            favicon.ico
+            favicon-16x16.png
+            favicon-32x32.png
+            apple-touch-icon.png
+            android-chrome-192x192.png
+            android-chrome-512x512.png
+            site.webmanifest
+          )
+          missing=0
+          for path in "${expected[@]}"; do
+            if [ ! -s "${path}" ]; then
+              echo "missing synchronized browser icon: ${path}"
+              missing=1
+            fi
+          done
+          if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ] && [ "${missing}" -ne 0 ]; then
+            exit 1
+          fi
+          if [ "${missing}" -ne 0 ]; then
+            echo "Icon synchronization is completed by the interface preview workflow before final review."
+          fi
 
       - name: Check repository links offline
         uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
