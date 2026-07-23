@@ -19,6 +19,14 @@
 
 Public status page for Atlas Systems, in three sections: a live signal grid checked from the visitor's browser, formal SLOs with error budget burn-down computed from probe history the edge accrues server-side, and a chronological feed of recent estate activity. Nothing here is a screenshot or a manually written incident line; every number traces to a request that actually happened.
 
+## Public interface
+
+Status consumes Public Interface System v2 through a repository-local copy of `atlas-interface-kit` v0.1.1 under `static/vendor/atlas-interface/`. `manifest.json` pins the exact bytes and SHA-256 fingerprint of the shared tokens and component foundations; `scripts/verify_interface_bundle.py` fails if that copy drifts.
+
+The global header, product identity, metadata, icon links, and mobile bottom navigation are materialized in `index.html`. JavaScript refreshes evidence, opens estate search, and normalizes link behaviour, but it does not replace stale source navigation at runtime. The operational grid, service-level tables, and activity feed remain Status-owned components.
+
+Runtime presentation assets are local to this deployment. Status does not fetch a stylesheet from `atlas-systems`, `atlas-infra`, or `atlas-interface-kit`, so those surfaces may deploy or fail independently.
+
 ## Service model
 
 The live signal grid reads from the same registry and public API surface as the Lab system map, with a fallback list so the page still shows a useful degraded state if the registry itself is unavailable. Each tile is a real request from the visitor's browser, repeated every 30 seconds, reporting operational, unreachable, or timed out, with the round trip in milliseconds.
@@ -53,7 +61,12 @@ curl https://api.atlas-systems.uk/v1/reliability
 curl https://api.atlas-systems.uk/v1/slo
 curl "https://api.atlas-systems.uk/notify/recent?limit=50"
 node --test test/reliability.test.mjs
+node --test test/*.test.mjs
+python3 scripts/normalize_page_title.py --check
+python3 scripts/verify_interface_bundle.py
 ```
+
+Pull requests that change the interface publish a non-production Cloudflare Pages preview from the exact head commit. Chrome and Firefox capture the page at 320, 375, 768, 1024, and 1440 pixels with deterministic unavailable evidence, semantic checks, serious accessibility blocking, and 14-day screenshot artifacts. Production remains unchanged until the pull request is approved, merged, and its independent deploy completes.
 
 ## How it fits into Atlas Systems
 

@@ -27,7 +27,11 @@ jobs:
 
       - name: Validate HTML and the SLO contract
         run: |
+          set -euo pipefail
           npx --yes html-validate@9.7.1 index.html
+          python3 scripts/normalize_page_title.py --check
+          python3 scripts/verify_interface_bundle.py
+          node --check scripts/capture_interface_evidence.mjs
           python3 - <<'PY'
           import json
           from pathlib import Path
@@ -66,7 +70,7 @@ jobs:
       - name: Run module tests
         run: node --test test/*.test.mjs
 
-      - name: Check browser icon package when synchronized
+      - name: Check repository-local browser icon package
         run: |
           set -euo pipefail
           expected=(
@@ -78,19 +82,21 @@ jobs:
             android-chrome-512x512.png
             site.webmanifest
           )
-          missing=0
           for path in "${expected[@]}"; do
-            if [ ! -s "${path}" ]; then
-              echo "missing synchronized browser icon: ${path}"
-              missing=1
-            fi
+            test -s "${path}"
           done
-          if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ] && [ "${missing}" -ne 0 ]; then
-            exit 1
-          fi
-          if [ "${missing}" -ne 0 ]; then
-            echo "Icon synchronization is completed by the interface preview workflow before final review."
-          fi
+
+      - name: Parse committed JSON and check whitespace
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          for path in sorted(Path(".").rglob("*.json")):
+              if ".git" not in path.parts:
+                  json.loads(path.read_text(encoding="utf-8"))
+          PY
+          git diff --check
 
       - name: Check repository links offline
         uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
