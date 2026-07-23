@@ -3,12 +3,28 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Live status for every Atlas Systems service, checked in your browser, right now.">
+<meta name="description" content="Live public service state, reliability objectives, evidence freshness, and recent Atlas Systems operational activity.">
 <meta name="theme-color" content="#0a0a0f">
-<link rel="icon" type="image/png" href="https://raw.githubusercontent.com/AtlasReaper311/AtlasReaper311/main/atlas-icon-dark-32.png">
 <title>Status // Atlas Systems</title>
+<link rel="canonical" href="https://status.atlas-systems.uk/">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16">
+<link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180">
+<link rel="manifest" href="/site.webmanifest">
+<meta property="og:type" content="website">
 <meta property="og:title" content="Status // Atlas Systems">
+<meta property="og:description" content="Live public service state, reliability objectives, evidence freshness, and recent Atlas Systems operational activity.">
+<meta property="og:url" content="https://status.atlas-systems.uk/">
+<meta property="og:site_name" content="Atlas Systems">
+<meta property="og:image" content="https://atlas-systems.uk/og-default.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Atlas Systems public status and reliability interface">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Status // Atlas Systems">
+<meta name="twitter:description" content="Live public service state, reliability objectives, evidence freshness, and recent Atlas Systems operational activity.">
+<meta name="twitter:image" content="https://atlas-systems.uk/og-default.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
@@ -44,22 +60,6 @@
     overflow-x: hidden;
   }
 
-  /* ── NAV (identical to atlas-systems.uk) ─────── */
-  nav {
-    position: fixed;
-    top: 0; left: 0; right: 0;
-    height: var(--nav-h);
-    background: rgba(10,10,15,0.85);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 clamp(1.5rem, 5vw, 3rem);
-    z-index: 100;
-  }
-
   .nav-wordmark {
     font-family: var(--mono);
     font-weight: 500;
@@ -71,29 +71,6 @@
   }
   .nav-wordmark span { color: var(--accent); }
 
-  .nav-links { display: flex; gap: 0; list-style: none; }
-  .nav-links a {
-    display: block;
-    padding: 0.35rem 1rem;
-    font-size: 12px;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--text-dim);
-    text-decoration: none;
-    transition: color 0.15s;
-    position: relative;
-  }
-  .nav-links a::after {
-    content: '';
-    position: absolute;
-    bottom: -1px; left: 50%; right: 50%;
-    height: 1px;
-    background: var(--accent);
-    transition: left 0.2s, right 0.2s;
-  }
-  .nav-links a:hover { color: var(--text); }
-  .nav-links a:hover::after { left: 1rem; right: 1rem; }
-
   /* ── MAIN LAYOUT ──────────────────────────────── */
   main {
     max-width: 1100px;
@@ -103,7 +80,7 @@
 
   /* ── HERO (same rhythm as the homepage hero) ──── */
   .hero {
-    padding-top: calc(var(--nav-h) + 6rem);
+    padding-top: 6rem;
     padding-bottom: 5rem;
     border-bottom: 1px solid var(--border);
     position: relative;
@@ -351,25 +328,65 @@
     pointer-events: none;
     z-index: 0;
   }
-  main, nav, footer { position: relative; z-index: 1; }
+  main, footer { position: relative; z-index: 1; }
 
   @media (max-width: 680px) {
-    .nav-links { display: none; }
-    .hero { padding-top: calc(var(--nav-h) + 3.5rem); }
+    .hero { padding-top: 3.5rem; }
   }
   @media (max-width: 420px) {
     .hero-heading { font-size: 2.2rem; }
   }
 </style>
+<link rel="stylesheet" href="/static/vendor/atlas-interface/v0.1.1/atlas-interface-kit.css">
+<link rel="stylesheet" href="/css/interface-shell.css?v=20260724-interface-v2">
 </head>
-<body>
+<body data-atlas-bottom-nav="true">
 
-<nav>
-  <a href="https://atlas-systems.uk" class="nav-wordmark">Atlas<span>_</span>Systems</a>
-  <ul class="nav-links">
-    <li><a href="https://atlas-systems.uk">atlas-systems.uk</a></li>
-  </ul>
-</nav>
+<header class="atlas-global-header status-global-header">
+  <div class="atlas-global-header__identity">
+    <a href="https://atlas-systems.uk/" class="nav-wordmark">Atlas<span>_</span>Systems</a>
+    <a
+      href="https://status.atlas-systems.uk/"
+      class="atlas-status atlas-estate-status"
+      data-atlas-status
+      data-state="checking"
+      aria-current="page"
+      aria-label="Atlas Systems status: Checking"
+    >
+      <span class="atlas-estate-status-dot" aria-hidden="true"></span>
+      <span class="atlas-estate-status-label" data-atlas-status-label>Checking</span>
+    </a>
+  </div>
+  <nav class="atlas-global-header__nav" aria-label="Primary navigation">
+    <a class="atlas-global-header__link" href="https://atlas-systems.uk/work/">Work</a>
+    <a class="atlas-global-header__link" href="https://atlas-systems.uk/writing/">Writing</a>
+    <a class="atlas-global-header__link" href="https://atlas-systems.uk/lab/">Lab</a>
+    <a class="atlas-global-header__link" href="https://atlas-systems.uk/systems/">Systems</a>
+    <a class="atlas-global-header__link" href="https://atlas-systems.uk/about/">About</a>
+  </nav>
+  <div class="atlas-global-header__actions">
+    <button
+      type="button"
+      class="status-search-button"
+      data-estate-search-open
+      aria-label="Search the estate"
+      aria-haspopup="dialog"
+    >
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <circle cx="11" cy="11" r="7"></circle>
+        <line x1="21" y1="21" x2="16.2" y2="16.2"></line>
+      </svg>
+      <span>Search</span>
+      <kbd>ctrl k</kbd>
+    </button>
+  </div>
+</header>
+
+<div class="atlas-product-strip status-product-strip">
+  <strong>Status</strong>
+  <span>Public service state and reliability evidence</span>
+  <time id="aggregateCheckedAt">Checking evidence</time>
+</div>
 
 <main>
   <section class="hero">
@@ -429,6 +446,14 @@
     <li><a href="https://atlas-systems.uk">Home</a></li>
   </ul>
 </footer>
+
+<nav class="atlas-bottom-nav status-bottom-nav" aria-label="Mobile navigation">
+  <a href="https://atlas-systems.uk/work/">Work</a>
+  <a href="https://atlas-systems.uk/writing/">Writing</a>
+  <a href="https://atlas-systems.uk/lab/">Lab</a>
+  <a href="https://atlas-systems.uk/systems/">Systems</a>
+  <a href="https://atlas-systems.uk/about/">About</a>
+</nav>
 
 <script>
 document.getElementById('footer-year').textContent = new Date().getFullYear();
