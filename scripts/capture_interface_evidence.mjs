@@ -131,7 +131,6 @@ async function inspectPage(page) {
     const bottomNavHeight = bottomNavVisible ? bottomNav.getBoundingClientRect().height : 0;
     const bodyPaddingBottom = Number.parseFloat(getComputedStyle(document.body).paddingBottom) || 0;
     const focusTarget = document.querySelector(".status-search-button");
-    focusTarget.focus();
     const focusStyle = getComputedStyle(focusTarget);
     const routes = [...document.querySelectorAll(".atlas-global-header__nav a")]
       .map((link) => link.textContent.trim());
@@ -156,6 +155,7 @@ async function inspectPage(page) {
       bodyPaddingBottom,
       bottomRoutes: [...bottomNav.querySelectorAll("a")].map((link) => link.textContent.trim()),
       searchHeight: Math.round(focusTarget.getBoundingClientRect().height),
+      searchFocused: document.activeElement === focusTarget,
       focusOutline: {
         style: focusStyle.outlineStyle,
         width: focusStyle.outlineWidth,
@@ -192,6 +192,7 @@ function semanticFailures(evidence, browserName, viewportName) {
     values.push(`${prefix}: bottom navigation can obscure content or focus`);
   }
   if (mobileExpected && evidence.searchHeight < 44) values.push(`${prefix}: search touch target is under 44px`);
+  if (!evidence.searchFocused) values.push(`${prefix}: keyboard Tab did not reach estate search`);
   if (evidence.focusOutline.style !== "solid" || Number.parseFloat(evidence.focusOutline.width) < 2) {
     values.push(`${prefix}: visible focus is missing`);
   }
@@ -224,6 +225,8 @@ async function capture(context, browserName, viewportName) {
   try {
     await openWithRetry(page);
     await verifySearchDialog(page, browserName, viewportName);
+    await page.locator(".atlas-global-header__nav a").last().focus();
+    await page.keyboard.press("Tab");
     const semantics = await inspectPage(page);
     const accessibility = await new AxeBuilder({ page })
       .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
