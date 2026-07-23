@@ -218,6 +218,17 @@ async function verifySearchDialog(page, browserName, viewportName) {
   if (!focusReturned) failures.push(`${browserName}/${viewportName}/status: search did not restore trigger focus`);
 }
 
+async function focusSearchWithKeyboard(page) {
+  await page.locator(".nav-wordmark").focus();
+  for (let index = 0; index < 10; index += 1) {
+    await page.keyboard.press("Tab");
+    const reached = await page.locator(".status-search-button").evaluate(
+      (button) => document.activeElement === button,
+    );
+    if (reached) return;
+  }
+}
+
 async function capture(context, browserName, viewportName) {
   const page = await context.newPage();
   const pageErrors = [];
@@ -225,8 +236,7 @@ async function capture(context, browserName, viewportName) {
   try {
     await openWithRetry(page);
     await verifySearchDialog(page, browserName, viewportName);
-    await page.locator(".atlas-global-header__nav a").last().focus();
-    await page.keyboard.press("Tab");
+    await focusSearchWithKeyboard(page);
     const semantics = await inspectPage(page);
     const accessibility = await new AxeBuilder({ page })
       .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
