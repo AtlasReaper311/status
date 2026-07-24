@@ -14,7 +14,7 @@ concurrency:
 
 jobs:
   deploy:
-    uses: AtlasReaper311/atlas-infra/.github/workflows/validate-static.yml@093df3f87fa4e068155455f82c9b69bffad76fb6 # atlas-infra main
+    uses: AtlasReaper311/atlas-infra/.github/workflows/validate-static.yml@e40d5a5cee6001df17918f69700aebb85d3d1cdd # atlas-infra main, Node 24 actions
     with:
       project_name: status
       site_label: status.atlas-systems.uk
