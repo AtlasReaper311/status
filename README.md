@@ -21,11 +21,15 @@ Public status page for Atlas Systems, in three sections: a live signal grid chec
 
 ## Public interface
 
-Status consumes Public Interface System v2 through a repository-local copy of `atlas-interface-kit` v0.1.1 under `static/vendor/atlas-interface/`. `manifest.json` pins the exact bytes and SHA-256 fingerprint of the shared tokens and component foundations; `scripts/verify_interface_bundle.py` fails if that copy drifts.
+Status consumes Public Interface System v2 through a repository-local copy of `atlas-interface-kit` v0.2.0 under `static/vendor/atlas-interface/`. `manifest.json` pins the exact bytes and SHA-256 fingerprint of the shared tokens, component foundations, self-hosted typefaces, and their licences; `scripts/verify_interface_bundle.py` fails if that copy drifts.
 
 The global header, product identity, metadata, icon links, and mobile bottom navigation are materialized in `index.html`. JavaScript refreshes evidence, opens estate search, and normalizes link behaviour, but it does not replace stale source navigation at runtime. The operational grid, service-level tables, and activity feed remain Status-owned components.
 
 Runtime presentation assets are local to this deployment. Status does not fetch a stylesheet from `atlas-systems`, `atlas-infra`, or `atlas-interface-kit`, so those surfaces may deploy or fail independently.
+
+Cloudflare Pages applies the committed `_headers` policy to every route. The
+policy prevents framing and MIME sniffing, limits browser capabilities, and
+allows runtime connections only to this site and the public Atlas API.
 
 ## Service model
 
