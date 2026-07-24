@@ -42,6 +42,10 @@ test("source HTML materializes the accepted shell and metadata", () => {
   assert.match(html, /static\/vendor\/atlas-interface\/v0\.2\.0\/atlas-fonts\.css/);
   assert.match(html, /static\/vendor\/atlas-interface\/v0\.2\.0\/atlas-interface-kit\.css/);
   assert.doesNotMatch(html, /fonts\.(?:googleapis|gstatic)\.com/);
+  assert.match(html, /property="og:image" content="https:\/\/atlas-systems\.uk\/og\/status\.png"/);
+  assert.match(html, /name="twitter:image" content="https:\/\/atlas-systems\.uk\/og\/status\.png"/);
+  assert.match(html, /property="og:image:alt" content="Live estate status\. \/\/ Atlas Systems"/);
+  assert.match(html, /name="twitter:image:alt" content="Live estate status\. \/\/ Atlas Systems"/);
   assert.match(html, /class="atlas-global-header status-global-header"/);
   assert.match(html, /class="atlas-product-strip status-product-strip"/);
   assert.match(html, /class="atlas-bottom-nav status-bottom-nav"/);
