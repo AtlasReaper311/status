@@ -1,0 +1,82 @@
+name: Patch and validate Status product landmark
+
+on:
+  push:
+    branches: [feat/security-txt]
+    paths:
+      - ".github/workflows/phase3-patch-landmark.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ${{ github.repository }}-phase3-status-landmark-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out exact branch
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0, Node 24
+        with:
+          ref: feat/security-txt
+          fetch-depth: 0
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0, Node 24
+        with:
+          node-version: "22"
+      - name: Materialize named product landmark
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path("index.html")
+          source = path.read_text(encoding="utf-8")
+          old = '''<div class="atlas-product-strip status-product-strip">
+  <strong>Status</strong>
+  <span>Public service state and reliability evidence</span>
+  <time id="aggregateCheckedAt">Checking evidence</time>
+</div>'''
+          new = '''<section class="atlas-product-strip status-product-strip" aria-label="Status product identity">
+  <strong>Status</strong>
+  <span>Public service state and reliability evidence</span>
+  <time id="aggregateCheckedAt">Checking evidence</time>
+</section>'''
+          if source.count(old) != 1:
+              raise SystemExit(f"expected one Status product-strip block, found {source.count(old)}")
+          path.write_text(source.replace(old, new), encoding="utf-8")
+
+          Path("test/phase3-assurance.test.mjs").write_text('''import assert from "node:assert/strict";
+import fs from "node:fs";
+import test from "node:test";
+
+const html = fs.readFileSync("index.html", "utf8");
+
+test("Status product identity is a named landmark", () => {
+  assert.match(
+    html,
+    /<section class="atlas-product-strip status-product-strip" aria-label="Status product identity">/,
+  );
+  assert.doesNotMatch(html, /<div class="atlas-product-strip status-product-strip">/);
+});
+''', encoding="utf-8")
+          PY
+      - name: Validate Status source and contracts
+        run: |
+          set -euo pipefail
+          npx --yes html-validate@9.7.1 index.html
+          node --test test/*.test.mjs
+          python3 scripts/normalize_page_title.py --check
+          python3 scripts/verify_interface_bundle.py
+          git diff --check
+      - name: Commit permanent source
+        run: |
+          set -euo pipefail
+          git add index.html test/phase3-assurance.test.mjs
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "fix: expose Status product identity as a landmark"
+          git push origin HEAD:feat/security-txt
