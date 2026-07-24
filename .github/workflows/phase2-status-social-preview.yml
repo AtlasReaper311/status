@@ -114,13 +114,13 @@ jobs:
           python3 scripts/verify_interface_bundle.py
           git diff --check
 
-      - name: Commit exact generated changes
+      - name: Commit generated HTML and tests
         run: |
           set -euo pipefail
-          git add index.html test/interface-shell.test.mjs .github/workflows/deploy.yml
+          git add index.html test/interface-shell.test.mjs
           if git diff --cached --quiet
           then
-            echo "Status source is already materialized"
+            echo "Status HTML and tests are already materialized"
             exit 0
           fi
           git config user.name "github-actions[bot]"
