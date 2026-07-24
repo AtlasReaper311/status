@@ -1,0 +1,53 @@
+{
+  "schema_version": "atlas-control-plane/public-interface-surface/v1",
+  "repository": "AtlasReaper311/status",
+  "surfaces": [
+    {
+      "url": "https://status.atlas-systems.uk/",
+      "source": "index.html",
+      "kind": "status",
+      "indexing": "index",
+      "global_header": true,
+      "search": true,
+      "status_indicator": "aggregate-link",
+      "icons": [
+        "android-chrome-192x192.png",
+        "android-chrome-512x512.png",
+        "apple-touch-icon.png",
+        "favicon-16x16.png",
+        "favicon-32x32.png",
+        "favicon.ico",
+        "site.webmanifest"
+      ],
+      "metadata": [
+        "title",
+        "description",
+        "canonical",
+        "theme-color",
+        "icons",
+        "og:type",
+        "og:title",
+        "og:description",
+        "og:url",
+        "og:site_name",
+        "og:image",
+        "og:image:width",
+        "og:image:height",
+        "og:image:alt",
+        "twitter:card",
+        "twitter:title",
+        "twitter:description",
+        "twitter:image"
+      ],
+      "footer": "Status evidence and Atlas estate escape",
+      "link_policy": "atlas-owned-same-tab-external-safe-new-tab",
+      "generated_owner": null,
+      "notes": [
+        "Runtime state remains evidence-bound and separate from interface conformance."
+      ]
+    }
+  ],
+  "machine_surface_exclusions": [
+    "JSON status, health, reliability, and evidence endpoints"
+  ]
+}
