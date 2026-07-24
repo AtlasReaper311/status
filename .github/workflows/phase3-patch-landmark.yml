@@ -64,19 +64,31 @@ test("Status product identity is a named landmark", () => {
 });
 ''', encoding="utf-8")
           PY
-      - name: Validate Status source and contracts
+      - name: Validate, commit, and preserve exact result
         run: |
-          set -euo pipefail
-          npx --yes html-validate@9.7.1 index.html
-          node --test test/*.test.mjs
-          python3 scripts/normalize_page_title.py --check
-          python3 scripts/verify_interface_bundle.py
-          git diff --check
-      - name: Commit permanent source
-        run: |
-          set -euo pipefail
-          git add index.html test/phase3-assurance.test.mjs
+          set -uo pipefail
+          set +e
+          (
+            set -euo pipefail
+            npx --yes html-validate@9.7.1 index.html
+            node --test test/*.test.mjs
+            python3 scripts/normalize_page_title.py --check
+            python3 scripts/verify_interface_bundle.py
+            git diff --check
+          ) > .phase3-landmark-validation.log 2>&1
+          status=$?
+          set -e
+          if [ "${status}" -eq 0 ]
+          then
+            result=pass
+          else
+            result=fail
+          fi
+          printf '{"schema_version":"atlas-systems/status-landmark-validation/v1","result":"%s"}\n' "${result}" > .phase3-landmark-validation.json
+          git add index.html test/phase3-assurance.test.mjs .phase3-landmark-validation.json .phase3-landmark-validation.log
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git commit -m "fix: expose Status product identity as a landmark"
           git push origin HEAD:feat/security-txt
+          cat .phase3-landmark-validation.log
+          exit "${status}"
