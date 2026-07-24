@@ -68,6 +68,12 @@ python3 scripts/verify_interface_bundle.py
 
 Pull requests that change the interface publish a non-production Cloudflare Pages preview from the exact head commit. Chrome and Firefox capture the page at 320, 375, 768, 1024, and 1440 pixels with deterministic unavailable evidence, semantic checks, serious accessibility blocking, and 14-day screenshot artifacts. Production remains unchanged until the pull request is approved, merged, and its independent deploy completes.
 
+## Interface conformance
+
+Phase G adds a read-only browser-surface declaration and pinned Atlas Infra
+validation without changing Status runtime semantics. See
+[`docs/PHASE-G-INTERFACE-CONFORMANCE.md`](docs/PHASE-G-INTERFACE-CONFORMANCE.md).
+
 ## How it fits into Atlas Systems
 
 `status` sits above [`atlas-api-public`](https://github.com/AtlasReaper311/atlas-api-public) (probe counters and the SLO source document), [`atlas-api-index`](https://github.com/AtlasReaper311/atlas-api-index), [`atlas-notify`](https://github.com/AtlasReaper311/atlas-notify) (the event stream), [`github-pulse`](https://github.com/AtlasReaper311/github-pulse), [`site-pulse`](https://github.com/AtlasReaper311/site-pulse), and [`deploy-watch`](https://github.com/AtlasReaper311/deploy-watch). It is the public health view of the same estate that the portfolio and Lab page describe.
