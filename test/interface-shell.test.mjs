@@ -12,7 +12,7 @@ import {
 } from "../js/estate-status.js";
 
 const NOW = Date.parse("2026-07-23T08:00:00Z");
-const BUNDLE_ROOT = "static/vendor/atlas-interface/v0.1.1";
+const BUNDLE_ROOT = "static/vendor/atlas-interface/v0.2.0";
 const ROUTES = ["Work", "Writing", "Lab", "Systems", "About"];
 const snapshot = (operational, total, checkedAt = "2026-07-23T07:55:00Z") => ({
   estate: { operational, total_components: total, checked_at: checkedAt },
@@ -39,7 +39,9 @@ test("source HTML materializes the accepted shell and metadata", () => {
   assert.match(html, /<title>Status \/\/ Atlas Systems<\/title>/);
   assert.match(html, /<link rel="canonical" href="https:\/\/status\.atlas-systems\.uk\/">/);
   assert.doesNotMatch(html, /raw\.githubusercontent\.com/);
-  assert.match(html, /static\/vendor\/atlas-interface\/v0\.1\.1\/atlas-interface-kit\.css/);
+  assert.match(html, /static\/vendor\/atlas-interface\/v0\.2\.0\/atlas-fonts\.css/);
+  assert.match(html, /static\/vendor\/atlas-interface\/v0\.2\.0\/atlas-interface-kit\.css/);
+  assert.doesNotMatch(html, /fonts\.(?:googleapis|gstatic)\.com/);
   assert.match(html, /class="atlas-global-header status-global-header"/);
   assert.match(html, /class="atlas-product-strip status-product-strip"/);
   assert.match(html, /class="atlas-bottom-nav status-bottom-nav"/);
@@ -98,24 +100,47 @@ test("repository-local interface bundle matches the canonical manifest", () => {
     .filter((entry) => entry.isDirectory())
     .map((entry) => entry.name)
     .sort();
-  assert.deepEqual(versions, ["v0.1.1"]);
+  assert.deepEqual(versions, ["v0.2.0"]);
 
   const manifest = JSON.parse(
     fs.readFileSync(`${BUNDLE_ROOT}/manifest.json`, "utf8"),
   );
   assert.equal(manifest.schema_version, "atlas-interface-kit/bundle/v1");
-  assert.equal(manifest.version, "0.1.1");
+  assert.equal(manifest.version, "0.2.0");
   assert.equal(manifest.contract_version, "2.0.0");
   assert.equal(manifest.component_role_count, 25);
   assert.deepEqual(
     Object.keys(manifest.files).sort(),
-    ["atlas-interface-kit.css", "components.json", "tokens.json"],
+    [
+      "atlas-fonts.css",
+      "atlas-interface-kit.css",
+      "components.json",
+      "fonts/dm-serif-display-400-italic.woff2",
+      "fonts/dm-serif-display-400.woff2",
+      "fonts/ibm-plex-mono-400.woff2",
+      "fonts/ibm-plex-mono-500.woff2",
+      "licenses/DM-Serif-Display-OFL.txt",
+      "licenses/IBM-Plex-Mono-OFL.txt",
+      "tokens.json",
+    ],
   );
   for (const [name, record] of Object.entries(manifest.files)) {
     const path = `${BUNDLE_ROOT}/${name}`;
     assert.equal(fs.statSync(path).size, record.bytes, `${name} byte count`);
     assert.equal(sha256(path), record.sha256, `${name} SHA-256`);
   }
+});
+
+test("Pages headers constrain the public status surface", () => {
+  const headers = fs.readFileSync("_headers", "utf8");
+  assert.match(headers, /Strict-Transport-Security: max-age=63072000; includeSubDomains/);
+  assert.match(headers, /X-Frame-Options: DENY/);
+  assert.match(headers, /X-Content-Type-Options: nosniff/);
+  assert.match(headers, /Referrer-Policy: no-referrer/);
+  assert.match(headers, /Permissions-Policy: camera=\(\), geolocation=\(\), microphone=\(\), payment=\(\), usb=\(\)/);
+  assert.match(headers, /connect-src 'self' https:\/\/api\.atlas-systems\.uk/);
+  assert.match(headers, /font-src 'self'/);
+  assert.doesNotMatch(headers, /fonts\.(?:googleapis|gstatic)\.com/);
 });
 
 test("Status typography, touch, focus, and reduced-motion rules use v2 tokens", () => {

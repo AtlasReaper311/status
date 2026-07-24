@@ -7,7 +7,7 @@ Bring `status.atlas-systems.uk` under Public Interface System v2 without changin
 ## Source authority
 
 - Governance: `AtlasReaper311/atlas-infra` policy `public-interface-system-v2.json`
-- Interface bundle: repository-local copy of `atlas-interface-kit` v0.1.1
+- Interface bundle: repository-local copy of `atlas-interface-kit` v0.2.0
 - Status behaviour: this repository's existing registry probes, reliability evaluator consumer, and activity feed
 
 ## Invariants
@@ -23,7 +23,8 @@ Bring `status.atlas-systems.uk` under Public Interface System v2 without changin
 ## Interface changes
 
 - Materialize the accepted shell in source HTML: wordmark and aggregate status on the left, Work/Writing/Lab/Systems/About in the centre, and compact estate search on the right.
-- Add the repository-local v0.1.1 interface bundle and verify its exact manifest fingerprints.
+- Add the repository-local v0.2.0 interface bundle and verify its exact
+  manifest fingerprints, self-hosted typefaces, and licence files.
 - Use the accepted mobile bottom navigation while retaining wordmark, status, and search in the top header.
 - Keep Status product identity visible directly below the global header.
 - Raise body and supporting copy to the accepted type scale, retain operational density for evidence rows, and keep metadata at 11px or above.
