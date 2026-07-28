@@ -15,6 +15,7 @@ on:
       - "index.html"
       - "js/**"
       - "scripts/capture_interface_evidence.mjs"
+      - "scripts/capture_comparable_interface_evidence.mjs"
       - "scripts/normalize_page_title.py"
       - "scripts/verify_interface_bundle.py"
       - "site.webmanifest"
@@ -52,6 +53,7 @@ jobs:
           set -euo pipefail
           npx --yes html-validate@9.7.1 index.html
           node --check scripts/capture_interface_evidence.mjs
+          node --check scripts/capture_comparable_interface_evidence.mjs
           node --test test/*.test.mjs
           python3 scripts/normalize_page_title.py --check
           python3 scripts/verify_interface_bundle.py
@@ -89,10 +91,10 @@ jobs:
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: status-interface-link-report
+          name: status-interface-link-report-${{ github.event.pull_request.head.sha }}
           path: interface-link-report.txt
           if-no-files-found: warn
-          retention-days: 7
+          retention-days: 14
 
   deploy-preview:
     name: Publish non-production Status preview
@@ -157,7 +159,7 @@ jobs:
           - Commit: \`${{ github.event.pull_request.head.sha }}\`
           - Production: unchanged
 
-          Browser and accessibility evidence is captured from this exact deployment."
+          Product-specific and comparable browser evidence are captured from this exact deployment."
           existing_id="$(gh api "/repos/${GITHUB_REPOSITORY}/issues/${{ github.event.pull_request.number }}/comments" --paginate --jq ".[] | select(.body | contains(\"${marker}\")) | .id" | head -n 1)"
           if [ -n "${existing_id}" ]; then
             gh api --method PATCH "/repos/${GITHUB_REPOSITORY}/issues/comments/${existing_id}" -f body="${body}"
@@ -169,16 +171,19 @@ jobs:
     name: Capture deterministic Status evidence
     needs: deploy-preview
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 60
     env:
       PREVIEW_URL: ${{ needs.deploy-preview.outputs.preview_url }}
       HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+      PRODUCT_ID: status
     steps:
-      - name: Check out evidence runner
+      - name: Check out evidence runners
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ github.event.pull_request.head.sha }}
-          sparse-checkout: scripts/capture_interface_evidence.mjs
+          sparse-checkout: |
+            scripts/capture_interface_evidence.mjs
+            scripts/capture_comparable_interface_evidence.mjs
           sparse-checkout-cone-mode: false
 
       - name: Set up Node.js
@@ -191,24 +196,32 @@ jobs:
           set -euo pipefail
           mkdir -p "${RUNNER_TEMP}/status-interface-evidence"
           cp scripts/capture_interface_evidence.mjs "${RUNNER_TEMP}/status-interface-evidence/"
+          cp scripts/capture_comparable_interface_evidence.mjs "${RUNNER_TEMP}/status-interface-evidence/"
           cd "${RUNNER_TEMP}/status-interface-evidence"
           npm init -y >/dev/null
           npm install --save-exact playwright@1.61.1 @axe-core/playwright@4.12.1
           npm audit --audit-level=high
           npx playwright install --with-deps firefox
 
-      - name: Capture governed browser and viewport matrix
+      - name: Capture product-specific browser and viewport matrix
         working-directory: ${{ runner.temp }}/status-interface-evidence
         run: node capture_interface_evidence.mjs
+
+      - name: Capture comparable cross-product evidence
+        working-directory: ${{ runner.temp }}/status-interface-evidence
+        run: node capture_comparable_interface_evidence.mjs
 
       - name: Upload visual and accessibility evidence
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: status-interface-preview-evidence
+          name: status-interface-preview-evidence-${{ github.event.pull_request.head.sha }}
           path: |
             ${{ runner.temp }}/status-interface-evidence/evidence.json
             ${{ runner.temp }}/status-interface-evidence/capture-error.txt
             ${{ runner.temp }}/status-interface-evidence/screenshots/*.png
+            ${{ runner.temp }}/status-interface-evidence/comparable-evidence.json
+            ${{ runner.temp }}/status-interface-evidence/comparable-capture-error.txt
+            ${{ runner.temp }}/status-interface-evidence/comparable-screenshots/*.png
           if-no-files-found: error
           retention-days: 14
