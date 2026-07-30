@@ -1,6 +1,6 @@
 "use strict";
 
-const FOOTER_STYLESHEET = "/css/phase-6-footer.css?v=20260730-phase-6-v1";
+const FOOTER_STYLESHEET = "/css/phase-6-footer.css?v=20260730-phase-6-v2";
 
 function ensureStylesheet() {
   if (document.head.querySelector(`link[href="${FOOTER_STYLESHEET}"]`)) return;
@@ -41,7 +41,6 @@ function buildStatusFooter() {
 
   const context = createSlot("atlas-footer__context", [
     createLink("Systems directory", "https://atlas-systems.uk/systems/"),
-    createLink("Lab", "https://atlas-systems.uk/lab/"),
   ]);
 
   const evidence = createSlot("atlas-footer__evidence", [
