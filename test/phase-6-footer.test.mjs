@@ -23,6 +23,14 @@ test("Status footer profile is product-specific, complete, and bounded", () => {
   assert.match(source, /atlas-footer__escape/);
   assert.match(source, /Atlas Systems Status/);
   assert.match(source, /Public service state and reliability evidence/);
+  assert.match(
+    source,
+    /createLink\("Public API", "https:\/\/api\.atlas-systems\.uk\/v1\/docs"\)/,
+  );
+  assert.doesNotMatch(
+    source,
+    /createLink\("Public API", "https:\/\/api\.atlas-systems\.uk\/v1"\)/,
+  );
   assert.doesNotMatch(source, /createLink\("Lab"/);
   assert.equal((source.match(/createLink\(/g) || []).length, 5);
   assert.doesNotMatch(source, /atlas-footer__sequence/);
