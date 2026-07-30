@@ -1,0 +1,18 @@
+/* Status Phase 8 accessibility corrections for the shared global header. */
+
+.nav-wordmark {
+  min-width: var(--atlas-touch-min);
+  min-height: var(--atlas-touch-min);
+  display: inline-flex;
+  align-items: center;
+}
+
+.status-global-header .atlas-global-header__link {
+  min-width: var(--atlas-touch-min);
+  justify-content: center;
+}
+
+.atlas-estate-status,
+.status-search-button {
+  min-height: var(--atlas-touch-min);
+}
