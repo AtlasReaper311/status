@@ -5,6 +5,7 @@ import {
 } from "./estate-status.js";
 import { installEstateSearch } from "./estate-search.js";
 import { installStatusFooter } from "./phase-6-footer.js";
+import { ensurePhase8AccessibilityStylesheet } from "./phase-8-accessibility.js";
 
 const TIMEOUT_MS = 6_000;
 const ATLAS_HOSTS = new Set([
@@ -95,6 +96,7 @@ function observeLinks() {
 function install() {
   const chip = document.querySelector("[data-atlas-status]");
   const checked = document.getElementById("aggregateCheckedAt");
+  ensurePhase8AccessibilityStylesheet();
   installStatusFooter();
   normalizeLinks();
   observeLinks();
