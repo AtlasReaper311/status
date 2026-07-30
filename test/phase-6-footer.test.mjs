@@ -13,8 +13,8 @@ test("Status footer module is installed by the existing interface shell", () => 
   assert.match(shell, /installStatusFooter\(\);/);
 });
 
-test("Status footer profile is product-specific and complete", () => {
-  assert.equal(FOOTER_STYLESHEET, "/css/phase-6-footer.css?v=20260730-phase-6-v1");
+test("Status footer profile is product-specific, complete, and bounded", () => {
+  assert.equal(FOOTER_STYLESHEET, "/css/phase-6-footer.css?v=20260730-phase-6-v2");
   const source = fs.readFileSync("js/phase-6-footer.js", "utf8");
   assert.match(source, /atlas-footer--product/);
   assert.match(source, /atlas-footer__identity/);
@@ -23,19 +23,20 @@ test("Status footer profile is product-specific and complete", () => {
   assert.match(source, /atlas-footer__escape/);
   assert.match(source, /Atlas Systems Status/);
   assert.match(source, /Public service state and reliability evidence/);
+  assert.doesNotMatch(source, /createLink\("Lab"/);
+  assert.equal((source.match(/createLink\(/g) || []).length, 5);
   assert.doesNotMatch(source, /atlas-footer__sequence/);
   assert.equal(typeof buildStatusFooter, "function");
 });
 
-test("footer-only presentation keeps a compact two-band desktop rail and v0.4.0 responsive behaviour", () => {
+test("footer-only presentation keeps a single underlined product rail and v0.4.0 responsive behaviour", () => {
   const css = fs.readFileSync("css/phase-6-footer.css", "utf8");
   assert.match(css, /atlas-interface-kit v0\.4\.0/);
-  assert.match(
-    css,
-    /grid-template-areas:\s*"identity escape"\s*"context evidence"/,
-  );
+  assert.match(css, /\.atlas-footer\s*\{[\s\S]*display: flex;/);
+  assert.match(css, /flex-wrap: wrap/);
   assert.match(css, /margin: var\(--atlas-space-7, 48px\) auto 0/);
-  assert.match(css, /padding: var\(--atlas-space-5, 24px\)/);
+  assert.match(css, /padding: var\(--atlas-space-4, 16px\)/);
+  assert.match(css, /text-decoration: underline/);
   assert.match(css, /min-width: var\(--atlas-touch-min, 44px\)/);
   assert.match(css, /min-height: var\(--atlas-touch-min, 44px\)/);
   assert.match(css, /@media \(max-width: 767px\)/);
