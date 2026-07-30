@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en" data-atlas-bottom-nav="true">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="The requested Status route does not exist. Return to live Atlas Systems service state and reliability evidence.">
+  <meta name="robots" content="noindex, follow">
+  <meta name="theme-color" content="#0a0a0f">
+  <title>404 // Status // Atlas Systems</title>
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16">
+  <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180">
+  <link rel="manifest" href="/site.webmanifest">
+  <link rel="stylesheet" href="/static/vendor/atlas-interface/v0.2.0/atlas-fonts.css?v=0.2.0">
+  <link rel="stylesheet" href="/static/vendor/atlas-interface/v0.2.0/atlas-interface-kit.css?v=0.2.0">
+  <link rel="stylesheet" href="/css/interface-shell.css?v=20260724-interface-v2">
+  <link rel="stylesheet" href="/css/phase-6-footer.css?v=20260730-phase-6-v2">
+  <style>
+    *,*::before,*::after{box-sizing:border-box}
+    html{min-height:100%;background:var(--atlas-bg)}
+    body{min-height:100vh;margin:0;background:var(--atlas-bg);color:var(--atlas-text);font-family:var(--atlas-font-body);display:flex;flex-direction:column}
+    .status-error-strip{grid-template-columns:auto minmax(0,1fr) auto}
+    .status-error-strip span:last-child{color:var(--atlas-unavailable)}
+    .error-main{width:min(100%,1100px);margin:0 auto;flex:1;display:grid;align-items:center;padding:clamp(48px,10vw,120px) clamp(16px,5vw,48px)}
+    .error-panel{max-width:760px;border:1px solid var(--atlas-border-hi);border-radius:var(--atlas-radius-lg);padding:clamp(24px,5vw,48px);background:var(--atlas-bg-1)}
+    .error-code{margin:0 0 var(--atlas-space-3);color:var(--atlas-unavailable);font-size:var(--atlas-type-meta);letter-spacing:.14em;text-transform:uppercase}
+    .error-panel h1{max-width:680px;margin:0;color:var(--atlas-text);font:400 clamp(42px,8vw,76px)/.98 var(--atlas-font-display)}
+    .error-panel p{max-width:620px;margin:var(--atlas-space-4) 0 0;color:var(--atlas-text-dim);font-size:var(--atlas-type-body);line-height:1.75}
+    .error-actions{display:flex;flex-wrap:wrap;gap:var(--atlas-space-3);margin-top:var(--atlas-space-6)}
+    .error-actions a{min-height:var(--atlas-touch-min);display:inline-flex;align-items:center;padding:0 var(--atlas-space-4);border:1px solid var(--atlas-border-hi);border-radius:var(--atlas-radius-sm);color:var(--atlas-text);text-decoration:none}
+    .error-actions a:first-child{border-color:var(--atlas-accent);color:var(--atlas-accent)}
+    .error-actions a:hover{background:var(--atlas-bg-2)}
+    :where(a):focus-visible{outline:2px solid var(--atlas-focus);outline-offset:3px}
+    @media(max-width:767px){.status-error-strip{grid-template-columns:1fr auto}.status-error-strip span:nth-child(2){grid-column:1/-1;grid-row:2}.error-main{padding-bottom:calc(var(--atlas-space-9) + env(safe-area-inset-bottom))}}
+  </style>
+</head>
+<body>
+  <header class="atlas-global-header status-global-header">
+    <div class="atlas-global-header__identity">
+      <a class="nav-wordmark" href="https://atlas-systems.uk/">Atlas<span>_</span>Systems</a>
+      <a class="atlas-status atlas-estate-status" href="/" data-state="unknown" aria-label="Open Atlas Systems Status">
+        <span class="atlas-estate-status-dot" aria-hidden="true"></span>
+        <span>Status</span>
+      </a>
+    </div>
+    <nav class="atlas-global-header__nav" aria-label="Primary navigation">
+      <a class="atlas-global-header__link" href="https://atlas-systems.uk/work/">Work</a>
+      <a class="atlas-global-header__link" href="https://atlas-systems.uk/writing/">Writing</a>
+      <a class="atlas-global-header__link" href="https://atlas-systems.uk/lab/">Lab</a>
+      <a class="atlas-global-header__link" href="https://atlas-systems.uk/systems/">Systems</a>
+      <a class="atlas-global-header__link" href="https://atlas-systems.uk/about/">About</a>
+    </nav>
+  </header>
+
+  <div class="atlas-product-strip status-product-strip status-error-strip">
+    <strong>Status</strong>
+    <span>Public service state and reliability evidence</span>
+    <span>route unavailable</span>
+  </div>
+
+  <main class="error-main">
+    <section class="error-panel" aria-labelledby="error-title">
+      <p class="error-code">HTTP 404 // status route</p>
+      <h1 id="error-title">No signal at this address.</h1>
+      <p>The requested path is not part of the public Status product. Live service checks, reliability objectives, evidence freshness, and recent operational activity remain available at the product root.</p>
+      <div class="error-actions">
+        <a href="/">Open Status</a>
+        <a href="https://atlas-systems.uk/systems/">Open Systems directory</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="atlas-footer atlas-footer--product" aria-label="Status product footer">
+    <div class="atlas-footer__identity"><strong>Atlas Systems Status</strong><span>Public service state and reliability evidence</span></div>
+    <div class="atlas-footer__context"><a href="/">Status home</a></div>
+    <div class="atlas-footer__evidence"><a href="https://api.atlas-systems.uk/v1/docs">Public API</a><a href="https://github.com/AtlasReaper311/status">Source</a></div>
+    <div class="atlas-footer__escape"><a href="https://atlas-systems.uk/">Atlas Systems home</a></div>
+  </footer>
+
+  <nav class="atlas-bottom-nav status-bottom-nav" aria-label="Mobile navigation">
+    <a href="https://atlas-systems.uk/work/">Work</a>
+    <a href="https://atlas-systems.uk/writing/">Writing</a>
+    <a href="https://atlas-systems.uk/lab/">Lab</a>
+    <a href="https://atlas-systems.uk/systems/">Systems</a>
+    <a href="https://atlas-systems.uk/about/">About</a>
+  </nav>
+</body>
+</html>
