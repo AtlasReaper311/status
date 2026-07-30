@@ -3,6 +3,7 @@ import {
   STATUS_LABELS,
   parseEstateStatus,
 } from "./estate-status.js";
+import { ensurePhase8AccessibilityStylesheet } from "./phase-8-accessibility.js";
 
 const TIMEOUT_MS = 6_000;
 
@@ -36,6 +37,7 @@ async function refreshStatus(chip) {
 }
 
 function install() {
+  ensurePhase8AccessibilityStylesheet();
   const chip = document.querySelector("[data-atlas-status]");
   if (chip) void refreshStatus(chip);
 }
