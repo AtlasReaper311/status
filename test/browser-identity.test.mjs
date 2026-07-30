@@ -4,6 +4,7 @@ import test from "node:test";
 
 const home = fs.readFileSync("index.html", "utf8");
 const notFound = fs.readFileSync("404.html", "utf8");
+const errorStatus = fs.readFileSync("js/error-status.js", "utf8");
 const icons = [
   ["icon", "/favicon.ico", "any"],
   ["icon", "/favicon-16x16.png", "16x16"],
@@ -32,7 +33,7 @@ test("Status root exposes one coherent browser identity", () => {
   assertIconContract(home);
 });
 
-test("Status owns a noindex 404 product response", () => {
+test("Status owns a noindex 404 product response with bounded live aggregate status", () => {
   assert.match(notFound, /<title>404 \/\/ Status \/\/ Atlas Systems<\/title>/);
   assert.match(notFound, /name="robots" content="noindex, follow"/);
   assert.match(notFound, /name="theme-color" content="#0a0a0f"/);
@@ -41,5 +42,13 @@ test("Status owns a noindex 404 product response", () => {
   assert.doesNotMatch(notFound, /name="twitter:/);
   assert.match(notFound, /class="atlas-footer atlas-footer--product"/);
   assert.match(notFound, /href="\/">Open Status<\/a>/);
+  assert.match(notFound, /class="nav-wordmark"[^>]*>Atlas<span>_<\/span>Systems<\/a>/);
+  assert.match(notFound, /\.nav-wordmark\{[^}]*text-transform:uppercase/);
+  assert.match(notFound, /data-atlas-status data-state="checking"/);
+  assert.match(notFound, /data-atlas-status-label>Checking<\/span>/);
+  assert.match(notFound, /<script type="module" src="\/js\/error-status\.js"><\/script>/);
+  assert.match(errorStatus, /STATUS_ENDPOINT/);
+  assert.match(errorStatus, /parseEstateStatus/);
+  assert.doesNotMatch(errorStatus, /v1\/registry|deploy-watch|activity|slo/i);
   assertIconContract(notFound);
 });

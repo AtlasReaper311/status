@@ -20,6 +20,8 @@
     *,*::before,*::after{box-sizing:border-box}
     html{min-height:100%;background:var(--atlas-bg)}
     body{min-height:100vh;margin:0;background:var(--atlas-bg);color:var(--atlas-text);font-family:var(--atlas-font-body);display:flex;flex-direction:column}
+    .nav-wordmark{min-height:var(--atlas-touch-min);display:inline-flex;align-items:center;flex:none;color:var(--atlas-text);font-size:13px;font-weight:500;letter-spacing:.12em;text-decoration:none;text-transform:uppercase;white-space:nowrap}
+    .nav-wordmark span{color:var(--atlas-accent)}
     .status-error-strip{grid-template-columns:auto minmax(0,1fr) auto}
     .status-error-strip span:last-child{color:var(--atlas-unavailable)}
     .error-main{width:min(100%,1100px);margin:0 auto;flex:1;display:grid;align-items:center;padding:clamp(48px,10vw,120px) clamp(16px,5vw,48px)}
@@ -39,9 +41,9 @@
   <header class="atlas-global-header status-global-header">
     <div class="atlas-global-header__identity">
       <a class="nav-wordmark" href="https://atlas-systems.uk/">Atlas<span>_</span>Systems</a>
-      <a class="atlas-status atlas-estate-status" href="/" data-state="unknown" aria-label="Open Atlas Systems Status">
+      <a class="atlas-status atlas-estate-status" href="/" data-atlas-status data-state="checking" aria-label="Atlas Systems status: Checking">
         <span class="atlas-estate-status-dot" aria-hidden="true"></span>
-        <span>Status</span>
+        <span data-atlas-status-label>Checking</span>
       </a>
     </div>
     <nav class="atlas-global-header__nav" aria-label="Primary navigation">
@@ -85,5 +87,6 @@
     <a href="https://atlas-systems.uk/systems/">Systems</a>
     <a href="https://atlas-systems.uk/about/">About</a>
   </nav>
+  <script type="module" src="/js/error-status.js"></script>
 </body>
 </html>
