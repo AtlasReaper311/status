@@ -27,11 +27,17 @@ test("Status footer profile is product-specific and complete", () => {
   assert.equal(typeof buildStatusFooter, "function");
 });
 
-test("footer-only presentation preserves v0.4.0 responsive behaviour", () => {
+test("footer-only presentation keeps a compact two-band desktop rail and v0.4.0 responsive behaviour", () => {
   const css = fs.readFileSync("css/phase-6-footer.css", "utf8");
   assert.match(css, /atlas-interface-kit v0\.4\.0/);
-  assert.match(css, /grid-template-areas:/);
-  assert.match(css, /--atlas-touch-min, 44px/);
+  assert.match(
+    css,
+    /grid-template-areas:\s*"identity escape"\s*"context evidence"/,
+  );
+  assert.match(css, /margin: var\(--atlas-space-7, 48px\) auto 0/);
+  assert.match(css, /padding: var\(--atlas-space-5, 24px\)/);
+  assert.match(css, /min-width: var\(--atlas-touch-min, 44px\)/);
+  assert.match(css, /min-height: var\(--atlas-touch-min, 44px\)/);
   assert.match(css, /@media \(max-width: 767px\)/);
   assert.match(css, /safe-area-inset-bottom/);
   assert.match(css, /prefers-reduced-motion: reduce/);
