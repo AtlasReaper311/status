@@ -44,7 +44,7 @@ function buildStatusFooter() {
   ]);
 
   const evidence = createSlot("atlas-footer__evidence", [
-    createLink("Public API", "https://api.atlas-systems.uk/v1"),
+    createLink("Public API", "https://api.atlas-systems.uk/v1/docs"),
     createLink("Source", "https://github.com/AtlasReaper311/status"),
   ]);
 
