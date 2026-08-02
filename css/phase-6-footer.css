@@ -95,6 +95,7 @@
   .atlas-footer__identity {
     width: 100%;
     min-width: 0;
+    flex: 0 0 auto;
     margin-bottom: var(--atlas-space-1, 4px);
   }
 
@@ -102,6 +103,7 @@
   .atlas-footer__evidence,
   .atlas-footer__escape {
     width: 100%;
+    flex: 0 0 auto;
     flex-wrap: wrap;
     gap: 0 var(--atlas-space-3, 12px);
     border-left: 0;

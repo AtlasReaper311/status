@@ -48,6 +48,7 @@ test("footer-only presentation keeps a single underlined product rail and v0.4.0
   assert.match(css, /min-width: var\(--atlas-touch-min, 44px\)/);
   assert.match(css, /min-height: var\(--atlas-touch-min, 44px\)/);
   assert.match(css, /@media \(max-width: 767px\)/);
+  assert.match(css, /flex: 0 0 auto/);
   assert.match(css, /safe-area-inset-bottom/);
   assert.match(css, /prefers-reduced-motion: reduce/);
   assert.doesNotMatch(css, /atlas-footer__sequence/);
