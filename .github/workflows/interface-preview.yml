@@ -139,7 +139,7 @@ jobs:
         run: |
           set -euo pipefail
           output_file="${RUNNER_TEMP}/wrangler-pages-deploy.log"
-          npx --yes wrangler@4.113.0 pages deploy . \
+          npx --yes wrangler@4.116.0 pages deploy . \
             --project-name "${PROJECT_NAME}" \
             --branch "${PAGES_BRANCH}" \
             --commit-dirty=true 2>&1 | tee "${output_file}"
