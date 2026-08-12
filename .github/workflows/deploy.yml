@@ -14,7 +14,7 @@ concurrency:
 
 jobs:
   deploy:
-    uses: AtlasReaper311/atlas-infra/.github/workflows/validate-static.yml@a9a183bc055ec5e4c878e2d5aab8cf4a38ac9656 # atlas-infra Pages artifact boundary
+    uses: AtlasReaper311/atlas-infra/.github/workflows/validate-static.yml@9e09c7f195fab8b1a695818a3350847328dede0c # atlas-infra Pages artifact boundary (wrangler 4.116.0)
     with:
       project_name: status
       site_label: status.atlas-systems.uk
