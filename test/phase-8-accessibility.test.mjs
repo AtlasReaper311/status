@@ -12,10 +12,10 @@ function block(selector) {
   return css.match(new RegExp(`${escaped}\\s*\\{([\\s\\S]*?)\\}`))?.[1] || "";
 }
 
-test("Phase 8 gives every measured Status header control a 44px target", () => {
+test("Phase 8 keeps compact desktop nav geometry while sizing stateful controls", () => {
   assert.match(block(".nav-wordmark"), /min-width:\s*var\(--atlas-touch-min\)/);
   assert.match(block(".nav-wordmark"), /min-height:\s*var\(--atlas-touch-min\)/);
-  assert.match(block(".status-global-header .atlas-global-header__link"), /min-width:\s*var\(--atlas-touch-min\)/);
+  assert.doesNotMatch(css, /\.status-global-header \.atlas-global-header__link\s*\{[\s\S]*min-width:\s*var\(--atlas-touch-min\)/);
   assert.match(css, /\.atlas-estate-status,[\s\S]*\.status-search-button\s*\{[\s\S]*min-height:\s*var\(--atlas-touch-min\)/);
 });
 
