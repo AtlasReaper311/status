@@ -47,6 +47,7 @@ test("source HTML materializes the accepted shell and metadata", () => {
   assert.match(html, /property="og:image:alt" content="Live estate status\. \/\/ Atlas Systems"/);
   assert.match(html, /name="twitter:image:alt" content="Live estate status\. \/\/ Atlas Systems"/);
   assert.match(html, /class="atlas-global-header status-global-header"/);
+  assert.match(html, /class="atlas-header__inner"/);
   assert.match(html, /class="atlas-product-strip status-product-strip"/);
   assert.match(html, /class="atlas-bottom-nav status-bottom-nav"/);
   assert.match(html, /data-atlas-status/);
@@ -61,10 +62,17 @@ test("source HTML materializes the accepted shell and metadata", () => {
   assert.ok(desktop);
   assert.ok(mobile);
   const css = fs.readFileSync("css/interface-shell.css", "utf8");
+  assert.match(css, /\.status-global-header\.atlas-global-header\s*\{[^}]*display: block;/s);
+  assert.match(css, /\.status-global-header \.atlas-header__inner\s*\{[^}]*width: min\(calc\(100% - 48px\), 1280px\);/s);
+  assert.match(css, /\.status-global-header \.atlas-header__inner\s*\{[^}]*gap: 24px;/s);
   assert.match(css, /\.status-global-header \.atlas-global-header__nav\s*\{[^}]*gap: 24px;/s);
-  assert.match(css, /\.status-global-header \.atlas-global-header__link\s*\{[^}]*padding: 0;/s);
+  assert.match(css, /\.status-global-header \.atlas-global-header__link\s*\{[^}]*padding-inline: 12px;/s);
   assert.match(css, /\.status-global-header \.atlas-global-header__link\s*\{[^}]*font-size: 12px;/s);
   assert.match(css, /\.status-global-header \.atlas-global-header__link\s*\{[^}]*letter-spacing: 0\.06em;/s);
+  assert.match(css, /\.status-search-button\s*\{[^}]*min-height: 44px;/s);
+  assert.match(css, /\.status-search-button\s*\{[^}]*padding: 0 14px;/s);
+  assert.match(css, /\.status-product-strip\s*\{[^}]*padding-inline: max\(24px, calc\(\(100% - 1280px\) \/ 2\)\);/s);
+  assert.doesNotMatch(css, /\.status-global-header \.atlas-global-header__link\s*\{[^}]*padding:\s*0;/s);
   assert.doesNotMatch(css, /\.status-global-header \.atlas-global-header__nav\s*\{[^}]*gap: 0;/s);
   assert.doesNotMatch(css, /\.status-global-header \.atlas-global-header__nav\s*\{[^}]*gap: var\(--atlas-space-3\);/s);
   for (const source of [desktop, mobile]) {
