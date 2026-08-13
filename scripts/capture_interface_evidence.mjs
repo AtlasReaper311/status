@@ -135,6 +135,26 @@ async function inspectPage(page) {
     const routes = [...document.querySelectorAll(".atlas-global-header__nav a")]
       .map((link) => link.textContent.trim());
 
+    const header = document.querySelector(".status-global-header");
+    const inner = document.querySelector(".atlas-header__inner");
+    const wordmark = document.querySelector(".nav-wordmark");
+    const status = document.querySelector(".atlas-estate-status");
+    const nav = document.querySelector(".atlas-global-header__nav");
+    const firstLink = nav?.querySelector("a");
+    const search = document.querySelector(".status-search-button");
+    const strip = document.querySelector(".status-product-strip");
+    const box = (el) => {
+      if (!el) return null;
+      const r = el.getBoundingClientRect();
+      return {
+        x: Number(r.x.toFixed(2)),
+        y: Number(r.y.toFixed(2)),
+        width: Number(r.width.toFixed(2)),
+        height: Number(r.height.toFixed(2)),
+        right: Number(r.right.toFixed(2)),
+      };
+    };
+
     return {
       title: document.title,
       canonical: document.querySelector('link[rel="canonical"]')?.href || null,
@@ -163,6 +183,22 @@ async function inspectPage(page) {
       bodyFont: Number.parseFloat(getComputedStyle(document.body).fontSize),
       supportingFont: Number.parseFloat(getComputedStyle(document.querySelector(".section-intro")).fontSize),
       metadataFont: Number.parseFloat(getComputedStyle(document.querySelector(".status-footnote")).fontSize),
+      headerGeometry: {
+        headerDisplay: header ? getComputedStyle(header).display : null,
+        innerWidth: inner ? Number(getComputedStyle(inner).width.replace("px", "")) : null,
+        innerGap: inner ? getComputedStyle(inner).gap : null,
+        linkPaddingLeft: firstLink ? getComputedStyle(firstLink).paddingLeft : null,
+        navDisplay: nav ? getComputedStyle(nav).display : null,
+        boxes: {
+          header: box(header),
+          inner: box(inner),
+          wordmark: box(wordmark),
+          status: box(status),
+          nav: box(nav),
+          search: box(search),
+          strip: box(strip),
+        },
+      },
     };
   });
 }
@@ -199,6 +235,28 @@ function semanticFailures(evidence, browserName, viewportName) {
   if (evidence.bodyFont < 15) values.push(`${prefix}: body copy is below 15px`);
   if (evidence.supportingFont < 13) values.push(`${prefix}: supporting copy is below 13px`);
   if (evidence.metadataFont < 11) values.push(`${prefix}: metadata is below 11px`);
+  const geometry = evidence.headerGeometry;
+  if (!geometry?.boxes?.inner) values.push(`${prefix}: Lab/X-Ray header inner rail is missing`);
+  if (geometry?.headerDisplay !== "block") values.push(`${prefix}: global header is not using the Lab/X-Ray block+inner layout`);
+  const desktopNav = Number(viewportName) >= 768;
+  if (desktopNav) {
+    if (geometry?.linkPaddingLeft !== "12px") {
+      values.push(`${prefix}: nav link padding is ${geometry?.linkPaddingLeft}, expected 12px from live Lab/X-Ray`);
+    }
+    if (!geometry?.boxes?.nav || geometry.boxes.nav.width < 400) {
+      values.push(`${prefix}: nav cluster is ${geometry?.boxes?.nav?.width}px wide, expected Lab/X-Ray ~422px`);
+    }
+    const wordmarkX = geometry?.boxes?.wordmark?.x;
+    const innerX = geometry?.boxes?.inner?.x;
+    if (Number.isFinite(wordmarkX) && Number.isFinite(innerX) && Math.abs(wordmarkX - innerX) > 1) {
+      values.push(`${prefix}: wordmark x ${wordmarkX} does not match inner rail ${innerX}`);
+    }
+    const searchRight = geometry?.boxes?.search?.right;
+    const innerRight = geometry?.boxes?.inner?.right;
+    if (Number.isFinite(searchRight) && Number.isFinite(innerRight) && Math.abs(searchRight - innerRight) > 1) {
+      values.push(`${prefix}: search right ${searchRight} does not match inner rail ${innerRight}`);
+    }
+  }
   return values;
 }
 
