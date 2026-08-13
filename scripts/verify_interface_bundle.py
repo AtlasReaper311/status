@@ -8,7 +8,7 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 VENDOR_ROOT = ROOT / "static/vendor/atlas-interface"
-VERSION = "0.2.0"
+VERSION = "0.5.0"
 BUNDLE_ROOT = VENDOR_ROOT / f"v{VERSION}"
 MANIFEST_PATH = BUNDLE_ROOT / "manifest.json"
 EXPECTED_FILES = {
@@ -21,6 +21,7 @@ EXPECTED_FILES = {
     "fonts/ibm-plex-mono-500.woff2",
     "licenses/DM-Serif-Display-OFL.txt",
     "licenses/IBM-Plex-Mono-OFL.txt",
+    "semantics.json",
     "tokens.json",
 }
 OBSOLETE_FILES = {
@@ -72,7 +73,7 @@ def verify() -> dict[str, Any]:
         "unexpected public interface contract version",
     )
     require(
-        manifest.get("component_role_count") == 25,
+        manifest.get("component_role_count") == 30,
         "unexpected component role count",
     )
 
