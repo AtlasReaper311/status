@@ -12,7 +12,7 @@ import {
 } from "../js/estate-status.js";
 
 const NOW = Date.parse("2026-07-23T08:00:00Z");
-const BUNDLE_ROOT = "static/vendor/atlas-interface/v0.2.0";
+const BUNDLE_ROOT = "static/vendor/atlas-interface/v0.5.0";
 const ROUTES = ["Work", "Writing", "Lab", "Systems", "About"];
 const snapshot = (operational, total, checkedAt = "2026-07-23T07:55:00Z") => ({
   estate: { operational, total_components: total, checked_at: checkedAt },
@@ -39,8 +39,8 @@ test("source HTML materializes the accepted shell and metadata", () => {
   assert.match(html, /<title>Status \/\/ Atlas Systems<\/title>/);
   assert.match(html, /<link rel="canonical" href="https:\/\/status\.atlas-systems\.uk\/">/);
   assert.doesNotMatch(html, /raw\.githubusercontent\.com/);
-  assert.match(html, /static\/vendor\/atlas-interface\/v0\.2\.0\/atlas-fonts\.css/);
-  assert.match(html, /static\/vendor\/atlas-interface\/v0\.2\.0\/atlas-interface-kit\.css/);
+  assert.match(html, /static\/vendor\/atlas-interface\/v0\.5\.0\/atlas-fonts\.css/);
+  assert.match(html, /static\/vendor\/atlas-interface\/v0\.5\.0\/atlas-interface-kit\.css/);
   assert.doesNotMatch(html, /fonts\.(?:googleapis|gstatic)\.com/);
   assert.match(html, /property="og:image" content="https:\/\/atlas-systems\.uk\/og\/status\.png"/);
   assert.match(html, /name="twitter:image" content="https:\/\/atlas-systems\.uk\/og\/status\.png"/);
@@ -104,15 +104,15 @@ test("repository-local interface bundle matches the canonical manifest", () => {
     .filter((entry) => entry.isDirectory())
     .map((entry) => entry.name)
     .sort();
-  assert.deepEqual(versions, ["v0.2.0"]);
+  assert.deepEqual(versions, ["v0.5.0"]);
 
   const manifest = JSON.parse(
     fs.readFileSync(`${BUNDLE_ROOT}/manifest.json`, "utf8"),
   );
   assert.equal(manifest.schema_version, "atlas-interface-kit/bundle/v1");
-  assert.equal(manifest.version, "0.2.0");
+  assert.equal(manifest.version, "0.5.0");
   assert.equal(manifest.contract_version, "2.0.0");
-  assert.equal(manifest.component_role_count, 25);
+  assert.equal(manifest.component_role_count, 30);
   assert.deepEqual(
     Object.keys(manifest.files).sort(),
     [
@@ -125,6 +125,7 @@ test("repository-local interface bundle matches the canonical manifest", () => {
       "fonts/ibm-plex-mono-500.woff2",
       "licenses/DM-Serif-Display-OFL.txt",
       "licenses/IBM-Plex-Mono-OFL.txt",
+      "semantics.json",
       "tokens.json",
     ],
   );
@@ -149,6 +150,8 @@ test("Pages headers constrain the public status surface", () => {
 
 test("Status typography, touch, focus, and reduced-motion rules use v2 tokens", () => {
   const css = fs.readFileSync("css/interface-shell.css", "utf8");
+  assert.match(css, /--atlas-shell-gutter: max\(24px, calc\(\(100% - 1280px\) \/ 2\)\)/);
+  assert.match(css, /grid-template-columns: minmax\(230px, 1fr\) auto minmax\(230px, 1fr\)/);
   assert.match(css, /font-size: var\(--atlas-type-body\)/);
   assert.match(css, /font-size: var\(--atlas-type-supporting\)/);
   assert.match(css, /font-size: var\(--atlas-type-meta\)/);

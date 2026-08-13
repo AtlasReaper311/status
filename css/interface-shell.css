@@ -14,6 +14,7 @@
   --serif: var(--atlas-font-display);
   --nav-h: 56px;
   --atlas-focus: var(--atlas-accent);
+  --atlas-shell-gutter: max(24px, calc((100% - 1280px) / 2));
 }
 
 html {
@@ -29,7 +30,8 @@ body {
   top: 0;
   width: 100%;
   min-height: var(--nav-h);
-  padding-inline: clamp(var(--atlas-space-4), 4vw, var(--atlas-space-7));
+  grid-template-columns: minmax(230px, 1fr) auto minmax(230px, 1fr);
+  padding-inline: var(--atlas-shell-gutter);
   background: rgba(10, 10, 15, 0.96);
 }
 
