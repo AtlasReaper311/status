@@ -61,8 +61,11 @@ test("source HTML materializes the accepted shell and metadata", () => {
   assert.ok(desktop);
   assert.ok(mobile);
   const css = fs.readFileSync("css/interface-shell.css", "utf8");
-  assert.match(css, /\.status-global-header \.atlas-global-header__nav\s*\{[^}]*gap: 0;/s);
-  assert.match(css, /\.status-global-header \.atlas-global-header__link\s*\{[^}]*padding: 0\.35rem 0\.85rem;/s);
+  assert.match(css, /\.status-global-header \.atlas-global-header__nav\s*\{[^}]*gap: 24px;/s);
+  assert.match(css, /\.status-global-header \.atlas-global-header__link\s*\{[^}]*padding: 0;/s);
+  assert.match(css, /\.status-global-header \.atlas-global-header__link\s*\{[^}]*font-size: 12px;/s);
+  assert.match(css, /\.status-global-header \.atlas-global-header__link\s*\{[^}]*letter-spacing: 0\.06em;/s);
+  assert.doesNotMatch(css, /\.status-global-header \.atlas-global-header__nav\s*\{[^}]*gap: 0;/s);
   assert.doesNotMatch(css, /\.status-global-header \.atlas-global-header__nav\s*\{[^}]*gap: var\(--atlas-space-3\);/s);
   for (const source of [desktop, mobile]) {
     let previous = -1;

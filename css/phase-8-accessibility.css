@@ -7,11 +7,6 @@
   align-items: center;
 }
 
-.status-global-header .atlas-global-header__link {
-  min-width: var(--atlas-touch-min);
-  justify-content: center;
-}
-
 .atlas-estate-status,
 .status-search-button {
   min-height: var(--atlas-touch-min);
