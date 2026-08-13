@@ -60,6 +60,10 @@ test("source HTML materializes the accepted shell and metadata", () => {
   )?.[0];
   assert.ok(desktop);
   assert.ok(mobile);
+  const css = fs.readFileSync("css/interface-shell.css", "utf8");
+  assert.match(css, /\.status-global-header \.atlas-global-header__nav\s*\{[^}]*gap: 0;/s);
+  assert.match(css, /\.status-global-header \.atlas-global-header__link\s*\{[^}]*padding: 0\.35rem 0\.85rem;/s);
+  assert.doesNotMatch(css, /\.status-global-header \.atlas-global-header__nav\s*\{[^}]*gap: var\(--atlas-space-3\);/s);
   for (const source of [desktop, mobile]) {
     let previous = -1;
     for (const route of ROUTES) {
